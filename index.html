@@ -59,6 +59,16 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
 .lexgroup{margin-bottom:9px}
 .lexgroup .gp{font-size:11.5px;font-weight:700;color:var(--wine);margin:0 0 5px}
 .noresult{color:var(--muted);font-style:italic;font-size:13px;text-align:center;padding:14px}
+.agefield{margin-top:12px}
+.agecard{border:1px solid var(--gold);background:#fffaf2;border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.agecard.premox{border-color:#c47f2a;background:#fff4e8}
+.agetop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.agelabel{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);font-weight:700}
+.ageband{font-family:Georgia,serif;font-size:18px;color:var(--wine);font-weight:700}
+.agebar{height:8px;background:var(--chip);border-radius:99px;overflow:hidden;margin:9px 0 6px}
+.agebar i{display:block;height:100%;background:linear-gradient(90deg,#7fae7f,var(--gold),var(--wine));border-radius:99px}
+.agewhy{font-size:12px;color:#5a4a50;margin:4px 0 0}
+.agewarn{font-size:12px;color:#a35a16;margin:6px 0 0;font-weight:600}
 .actions{position:sticky;bottom:0;margin-top:24px;display:flex;gap:12px;align-items:center;justify-content:center;
   background:linear-gradient(transparent,var(--bg) 40%);padding:18px 0 4px}
 .btn{border:none;border-radius:12px;padding:14px 30px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit}
@@ -144,7 +154,14 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
       <div class="field colourrow" id="colourField">
         <label>Colour <span class="hint">tap the shade that matches your glass — sets hue + depth</span></label>
         <div class="huegrid" id="hueGrid"></div>
-        <div class="hg-note" id="hueNote">Pick a wine type to see its colour range.</div></div>
+        <div class="hg-note" id="hueNote">Pick a wine type to see its colour range.</div>
+        <div class="field agefield" id="rimField" style="display:none">
+          <label>Rim / edge <span class="hint">the band at the very edge — the strongest age clue</span></label>
+          <div class="segs" id="rimRow"></div></div>
+        <div class="field agefield" id="sedimentField" style="display:none">
+          <label>Deposit / sediment <span class="hint">a sign of bottle age</span></label>
+          <div class="segs" id="sedimentRow"></div></div>
+      </div>
     </section>
 
     <!-- NOSE -->
@@ -167,6 +184,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
         <div class="field"><label>Sweetness</label><div class="segs" data-single="sweetness"></div></div>
         <div class="field"><label>Acidity</label><div class="segs" data-single="acidity"></div></div>
         <div class="field"><label>Tannin <span class="hint">reds only</span></label><div class="segs" data-single="tannin"></div></div>
+        <div class="field"><label>Tannin texture <span class="hint">reds — age clue</span></label><div class="segs" data-single="tanninTexture"></div></div>
       </div>
       <div>
         <div class="field"><label>Alcohol</label><div class="segs" data-single="alcohol"></div></div>
@@ -197,9 +215,16 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
   <div id="out"></div>
 
   <p class="footnote">
-    SimiWine makes educated deductions from a wine's appearance, structure and aroma. A wine's exact
-    producer or label cannot be known from tasting alone, so any named producers are
-    <em>illustrative examples of a style</em>, not identifications. For fun and learning — please drink responsibly.
+    <strong>For education &amp; entertainment only.</strong> SimiWine makes an educated guess from a wine's appearance,
+    structure and aroma. The grape, region and age it shows are <em>approximate ranges, not identifications</em>, and can
+    be thrown off by grape variety, region, oak, winemaking style and storage — a heat-damaged young wine can mimic an old
+    one. Always confirm against the actual label. This is not professional or commercial advice. Please enjoy wine responsibly,
+    in moderation, and only if you are of legal drinking age.
+    <br><br>
+    © 2026 SimiWine — created by Lian. All rights reserved. This tool, its design and its database are the creator's original
+    work and <strong>may not be copied, replicated, redistributed or reproduced</strong>, in whole or in part, without written permission.
+    <br><br>
+    ☕ <strong>Enjoyed SimiWine? Donations are warmly welcomed</strong> — they help keep it free and growing. Ask the creator for details.
   </p>
 </div>
 
@@ -549,7 +574,8 @@ DB.forEach(w=>{ w.col = COL[w.g+"|"+w.r] || []; });
    State + UI build
    ============================================================ */
 const state={type:null,intensity:null,colour:null,nintensity:null,development:null,
-  sweetness:null,acidity:null,tannin:null,alcohol:null,body:null,finish:null,clusters:new Set()};
+  sweetness:null,acidity:null,tannin:null,tanninTexture:null,alcohol:null,body:null,finish:null,
+  rim:null,rimLabel:null,sediment:null,clusters:new Set()};
 
 function seg(text){const d=document.createElement('div');d.className='seg';d.textContent=text;d.dataset.val=text;return d;}
 function buildSegs(sel,key,arr){
@@ -568,6 +594,7 @@ buildSegs('development','development',SC.development);
 buildSegs('sweetness','sweetness',SC.sweetness);
 buildSegs('acidity','acidity',SC.level);
 buildSegs('tannin','tannin',SC.level);
+buildSegs('tanninTexture','tanninTexture',["grippy / harsh","firm but ripe","silky / resolved"]);
 buildSegs('alcohol','alcohol',SC.level);
 buildSegs('body','body',SC.body);
 buildSegs('finish','finish',SC.finish);
@@ -613,6 +640,39 @@ function refreshColour(){
     });
     grid.appendChild(row);
   });
+  buildAgeAppearance();
+}
+// rim/edge (type-aware) + sediment — the appearance-based age clues
+function buildAgeAppearance(){
+  state.rim=null; state.rimLabel=null; state.sediment=null;
+  const RIM={
+    Red:[["vivid purple / magenta edge",0],["ruby to the edge",0.34],["garnet / brick edge",0.67],["orange-brown watery rim",1]],
+    White:[["pale, almost colourless edge",0],["gold edge",0.5],["amber / brown edge",1]],
+    Sparkling:[["pale, almost colourless edge",0],["gold edge",0.5],["amber edge",1]],
+    "Rosé":[["bright pink edge",0],["salmon edge",0.5],["orange edge",1]],
+    Fortified:[["gold edge",0.25],["amber edge",0.6],["brown edge",1]]
+  };
+  const rimRow=document.getElementById('rimRow'); rimRow.innerHTML='';
+  (RIM[state.type]||[]).forEach(([lab,val])=>{
+    const s=document.createElement('div');s.className='seg';s.textContent=lab;
+    s.onclick=()=>{ const on=state.rimLabel===lab;
+      rimRow.querySelectorAll('.seg').forEach(x=>x.classList.remove('on'));
+      if(on){state.rim=null;state.rimLabel=null;} else {state.rim=val;state.rimLabel=lab;s.classList.add('on');} };
+    rimRow.appendChild(s);
+  });
+  document.getElementById('rimField').style.display='';
+  const sedField=document.getElementById('sedimentField'), sedRow=document.getElementById('sedimentRow');
+  if(state.type==='Red'||state.type==='Fortified'){
+    sedRow.innerHTML='';
+    [["No deposit",false],["Visible sediment",true]].forEach(([lab,val])=>{
+      const s=document.createElement('div');s.className='seg';s.textContent=lab;
+      s.onclick=()=>{ const on=state.sediment===val;
+        sedRow.querySelectorAll('.seg').forEach(x=>x.classList.remove('on'));
+        if(on)state.sediment=null; else {state.sediment=val;s.classList.add('on');} };
+      sedRow.appendChild(s);
+    });
+    sedField.style.display='';
+  } else { sedField.style.display='none'; }
 }
 
 // aroma lexicon — one button per descriptor, grouped under its cluster prefix
@@ -737,9 +797,10 @@ function profileText(){
   const sel=[...state.clusters].map(id=>DESC[id]?`${DESC[id].label} (${DESC[id].prefix})`:id).join(', ');
   const L=[];
   L.push(`Wine type: ${state.type||'—'}`);
-  L.push(`Appearance: intensity ${state.intensity||'—'}, colour ${state.colour||'—'}`);
+  L.push(`Appearance: intensity ${state.intensity||'—'}, colour ${state.colour||'—'}, rim/edge ${state.rimLabel||'—'}`);
   L.push(`Nose: aroma intensity ${state.nintensity||'—'}, development ${state.development||'—'}`);
-  L.push(`Palate: sweetness ${state.sweetness||'—'}, acidity ${state.acidity||'—'}, tannin ${state.tannin||'—'}, alcohol ${state.alcohol||'—'}, body ${state.body||'—'}, finish ${state.finish||'—'}`);
+  L.push(`Palate: sweetness ${state.sweetness||'—'}, acidity ${state.acidity||'—'}, tannin ${state.tannin||'—'}, tannin texture ${state.tanninTexture||'—'}, alcohol ${state.alcohol||'—'}, body ${state.body||'—'}, finish ${state.finish||'—'}`);
+  L.push(`Age cues: sediment ${state.sediment?'visible':'—'}`);
   L.push(`Aroma/flavour clusters: ${sel||'—'}`);
   return L.join('\n');
 }
@@ -775,6 +836,50 @@ function offlineToData(){
 }
 
 /* ============================================================
+   Age / maturity estimator (colour-first, per blind-tasting method)
+   ============================================================ */
+function estimateAge(){
+  const t=state.type; if(!t) return null;
+  const order=COLOURS[t]||[];
+  const sig=[]; const notes=[];
+  // 1) colour hue position within the type's young→old progression
+  if(state.colour && order.length>1){ const i=order.indexOf(state.colour);
+    if(i>=0){ sig.push([i/(order.length-1),1.6]); notes.push(state.colour+' hue'); } }
+  // 2) depth — reds LOSE colour with age, whites GAIN it
+  if(state.intensity){ const di={pale:1,medium:0.5,deep:0}; let v=di[state.intensity];
+    if(t!=='Red' && t!=='Rosé') v=1-v; sig.push([v,0.7]); }
+  // 3) rim/edge — strongest single appearance clue
+  if(state.rim!=null){ sig.push([state.rim,1.5]); if(state.rimLabel)notes.push(state.rimLabel); }
+  // 4) development on the nose
+  const dev={youthful:0,developing:0.4,'fully developed':0.78,tired:1}[state.development];
+  if(dev!=null){ sig.push([dev,1.5]); notes.push(state.development+' nose'); }
+  // 5) primary-vs-tertiary aroma ratio
+  const sel=[...state.clusters].map(id=>DESC[id]&&DESC[id].key).filter(Boolean);
+  const TERT=new Set(['maturity','animal','mineral','kernel','dried_fruit']);
+  let tertShare=null;
+  if(sel.length){ tertShare=sel.filter(k=>TERT.has(k)).length/sel.length;
+    sig.push([tertShare,1.3]);
+    notes.push(tertShare>0.5?'mostly tertiary aromas':tertShare>0?'some tertiary aromas':'fresh primary fruit'); }
+  // 6) tannin texture (reds): grippy=young, resolved=old
+  if(t==='Red' && state.tanninTexture){ const tv={'grippy / harsh':0,'firm but ripe':0.45,'silky / resolved':0.9}[state.tanninTexture];
+    if(tv!=null){ sig.push([tv,1.0]); notes.push(state.tanninTexture+' tannins'); } }
+  const sedBonus=((t==='Red'||t==='Fortified') && state.sediment)?0.12:0;
+  if(sedBonus) notes.push('visible sediment');
+  if(!sig.length) return null;
+  let num=0,den=0; sig.forEach(([v,w])=>{num+=v*w;den+=w;});
+  const idx=Math.max(0,Math.min(1,num/den+sedBonus));
+  const colourOld = state.colour && order.indexOf(state.colour)>=order.length-2;
+  const premox = colourOld && tertShare!=null && tertShare<0.15;
+  let band,range;
+  if(idx<0.22){band='Youthful';range='~0–3 years';}
+  else if(idx<0.45){band='Developing';range='~3–8 years';}
+  else if(idx<0.70){band='Maturing';range='~8–15 years';}
+  else {band='Mature / old';range='~15+ years';}
+  const why='Read from: '+(notes.length?notes.join(', '):'limited cues')+'. Grape, region, oak & storage all shift this — treat it as a range, never a single vintage.';
+  return {band,range,idx,premox,why};
+}
+
+/* ============================================================
    Render
    ============================================================ */
 function render(data,engine){
@@ -786,6 +891,15 @@ function render(data,engine){
      <h3>${esc(data.headline||matches[0].grape)}</h3>
      <div class="vsub">${matches.length} candidate${matches.length>1?'s':''}, most likely first.</div>
    </div><div class="vbody">`;
+  const age=estimateAge();
+  if(age){
+    html+=`<div class="agecard ${age.premox?'premox':''}">
+      <div class="agetop"><span class="agelabel">Estimated age</span><span class="ageband">${esc(age.band)} · ${esc(age.range)}</span></div>
+      <div class="agebar"><i style="width:${Math.round(age.idx*100)}%"></i></div>
+      ${age.premox?`<p class="agewarn">⚠ The colour looks advanced but there are few tertiary aromas — this may be premature oxidation (heat / poor storage, or a cheap wine browning fast), not graceful age.</p>`:''}
+      <p class="agewhy">🕰 ${esc(age.why)}</p>
+    </div>`;
+  }
   matches.forEach((m,i)=>{
     const c=Math.max(2,Math.min(99,Math.round(m.confidence||0)));
     const hex = m.hue && HEX[m.hue] ? HEX[m.hue] : null;
