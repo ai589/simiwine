@@ -7,9 +7,9 @@
 <style>
 :root{
   color-scheme: light;
-  --bg:#fffaf7; --card:#ffffff; --ink:#33222b; --muted:#8a7a82;
-  --wine:#b1304f; --wine2:#c94a6c; --gold:#d3a242; --line:#f0e6e3;
-  --chip:#fbf1ef; --chip-on:#b1304f; --good:#2e9c63; --warn:#d3a242;
+  --bg:#fdf0ef; --card:#ffffff; --ink:#321a26; --muted:#9a7682;
+  --wine:#b02b56; --wine2:#cb456e; --gold:#d07d2c; --line:#f4e1e1;
+  --chip:#fbeded; --chip-on:#b02b56; --good:#2e9c63; --warn:#d07d2c;
   --shadow:0 1px 3px rgba(60,20,30,.08),0 8px 24px rgba(60,20,30,.06);
 }
 *{box-sizing:border-box}
@@ -21,6 +21,12 @@ header.hero{text-align:center;padding:18px 0 8px}
 .logo{font-size:13px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);font-weight:700}
 h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;color:var(--wine);letter-spacing:-.5px}
 .tag{color:var(--muted);font-size:15px;font-style:italic;margin:0}
+.hero-art{height:150px;border-radius:16px;margin:0 0 10px;
+  background:url('simiwine-hero-v2.jpg') center/cover no-repeat, linear-gradient(120deg,#f4c2bb,#f1b4b2,#f6dcdd);
+  box-shadow:var(--shadow);position:relative}
+.hero-art::after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(255,250,247,0) 55%,rgba(255,250,247,.92))}
+@media(max-width:560px){.hero-art{height:104px}}
 .engine-badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:12px;
   background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--muted);box-shadow:var(--shadow)}
 .dot{width:8px;height:8px;border-radius:50%;background:#bbb}
@@ -69,6 +75,31 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
 .agebar i{display:block;height:100%;background:linear-gradient(90deg,#7fae7f,var(--gold),var(--wine));border-radius:99px}
 .agewhy{font-size:12px;color:#5a4a50;margin:4px 0 0}
 .agewarn{font-size:12px;color:#a35a16;margin:6px 0 0;font-weight:600}
+/* live animated wine glass */
+.glasswrap{display:flex;flex-direction:column;align-items:center;gap:4px;margin:16px 0 2px}
+.glasscap{font-size:11.5px;color:var(--muted);letter-spacing:.04em;min-height:15px;text-transform:capitalize}
+#wineGroup{transition:opacity .4s}
+#wineLiquid,#wineMeniscus{transition:fill .4s}
+#glassSvg .leg{fill:var(--wl,#b1304f);opacity:0;animation:legdrip 3.4s ease-in-out infinite}
+#glassSvg .leg:nth-of-type(2){animation-delay:.7s}
+#glassSvg .leg:nth-of-type(3){animation-delay:1.4s}
+#glassSvg .leg:nth-of-type(4){animation-delay:2.1s}
+@keyframes legdrip{0%,100%{opacity:0;transform:translateY(0)}45%{opacity:.5}75%{opacity:.12;transform:translateY(9px)}}
+#glassSvg[data-legs="low"] .leg{animation:none;opacity:0}
+#glassSvg[data-legs="med"] .leg{animation-duration:4s}
+#glassSvg[data-legs="high"] .leg{animation-duration:5.6s}
+#glassSvg .shine{animation:swirl 6.5s ease-in-out infinite}
+@keyframes swirl{0%,100%{transform:translateX(0)}50%{transform:translateX(24px)}}
+#glassSvg #wineMeniscus{animation:bob 6.5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2px)}}
+#glassSvg #bubbles circle{fill:var(--wl,#eab9c4);opacity:0}
+#glassSvg[data-fizz="1"] #bubbles circle{animation:rise 2.6s linear infinite}
+#glassSvg[data-fizz="1"] #bubbles circle:nth-of-type(2){animation-delay:.5s}
+#glassSvg[data-fizz="1"] #bubbles circle:nth-of-type(3){animation-delay:1s}
+#glassSvg[data-fizz="1"] #bubbles circle:nth-of-type(4){animation-delay:1.5s}
+#glassSvg[data-fizz="1"] #bubbles circle:nth-of-type(5){animation-delay:2s}
+@keyframes rise{0%{transform:translateY(4px);opacity:0}18%{opacity:.85}100%{transform:translateY(-40px);opacity:0}}
+@media(prefers-reduced-motion:reduce){#glassSvg .leg,#glassSvg .shine,#glassSvg #wineMeniscus,#glassSvg #bubbles circle{animation:none!important}}
 .actions{position:sticky;bottom:0;margin-top:24px;display:flex;gap:12px;align-items:center;justify-content:center;
   background:linear-gradient(transparent,var(--bg) 40%);padding:18px 0 4px}
 .btn{border:none;border-radius:12px;padding:14px 30px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit}
@@ -78,7 +109,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
 .btn:disabled{opacity:.5;cursor:not-allowed}
 #out{margin-top:26px}
 .verdict{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
-.verdict .vhead{background:linear-gradient(135deg,var(--wine),#7d2342);color:#fff;padding:20px 24px}
+.verdict .vhead{background:linear-gradient(135deg,var(--wine),#6a113a);color:#fff;padding:20px 24px}
 .verdict .vhead .kicker{font-size:11px;letter-spacing:.28em;text-transform:uppercase;opacity:.8}
 .verdict .vhead h3{font-family:Georgia,serif;font-size:26px;margin:4px 0 2px}
 .verdict .vhead .vsub{opacity:.92;font-size:14px}
@@ -138,11 +169,47 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
 </head>
 <body>
 <div class="wrap">
+  <div class="hero-art" role="img" aria-label="SimiWine — stylised wine illustrations"></div>
   <header class="hero">
     <h1>🍷 SimiWine</h1>
     <p class="tag">The blind-tasting detective — describe what's in your glass and let's deduce the grape, region &amp; style.</p>
     <div class="engine-badge"><span class="dot" id="engineDot"></span><span id="engineText">Detecting engine…</span></div>
   </header>
+
+  <div class="glasswrap">
+    <svg id="glassSvg" viewBox="0 0 120 190" width="116" height="184" data-legs="low" data-fizz="0" aria-hidden="true">
+      <defs>
+        <clipPath id="bowlClip"><path d="M28 36 L92 36 C92 92 80 118 60 118 C40 118 28 92 28 36 Z"/></clipPath>
+        <linearGradient id="glassSheen" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+          <stop offset="0.6" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g clip-path="url(#bowlClip)">
+        <g id="wineGroup" style="opacity:0">
+          <rect id="wineLiquid" x="18" y="74" width="84" height="48" fill="#b1304f"/>
+          <ellipse class="shine" cx="44" cy="98" rx="9" ry="20" fill="#ffffff" opacity="0.10"/>
+          <ellipse id="wineMeniscus" cx="60" cy="74" rx="27" ry="4.5" fill="#cf6a82"/>
+          <g id="legs">
+            <rect class="leg" x="40" y="58" width="1.4" height="18"/>
+            <rect class="leg" x="51" y="56" width="1.4" height="20"/>
+            <rect class="leg" x="63" y="57" width="1.4" height="19"/>
+            <rect class="leg" x="73" y="58" width="1.4" height="18"/>
+          </g>
+          <g id="bubbles">
+            <circle cx="48" cy="112" r="1.6"/><circle cx="58" cy="112" r="1.3"/>
+            <circle cx="66" cy="112" r="1.7"/><circle cx="54" cy="112" r="1.2"/><circle cx="62" cy="112" r="1.5"/>
+          </g>
+        </g>
+      </g>
+      <path d="M28 36 C28 92 40 118 60 118 C80 118 92 92 92 36" fill="none" stroke="#dccdc8" stroke-width="2"/>
+      <ellipse cx="60" cy="36" rx="32" ry="7" fill="none" stroke="#dccdc8" stroke-width="2"/>
+      <rect x="58.5" y="118" width="3" height="46" fill="#dccdc8"/>
+      <ellipse cx="60" cy="168" rx="26" ry="6" fill="none" stroke="#dccdc8" stroke-width="2"/>
+      <path d="M41 48 C37 70 41 96 53 110" fill="none" stroke="url(#glassSheen)" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <div class="glasscap" id="glassCap">pick a wine type</div>
+  </div>
 
   <div class="grid">
     <!-- APPEARANCE -->
@@ -168,7 +235,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
     <section class="card">
       <h2><span class="n">2</span> Nose</h2>
       <p class="sub">Aroma intensity, development and character.</p>
-      <div class="field"><label>Aroma intensity</label>
+      <div class="field"><label>Aroma intensity <span class="hint">1 light – 5 pronounced</span></label>
         <div class="segs" data-single="nintensity"></div></div>
       <div class="field"><label>Development</label>
         <div class="segs" data-single="development"></div></div>
@@ -182,14 +249,14 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
     <div class="grid" style="margin-top:0">
       <div>
         <div class="field"><label>Sweetness</label><div class="segs" data-single="sweetness"></div></div>
-        <div class="field"><label>Acidity</label><div class="segs" data-single="acidity"></div></div>
-        <div class="field"><label>Tannin <span class="hint">reds only</span></label><div class="segs" data-single="tannin"></div></div>
+        <div class="field"><label>Acidity <span class="hint">1 low – 5 high</span></label><div class="segs" data-single="acidity"></div></div>
+        <div class="field"><label>Tannin <span class="hint">reds · 1 low – 5 high</span></label><div class="segs" data-single="tannin"></div></div>
         <div class="field"><label>Tannin texture <span class="hint">reds — age clue</span></label><div class="segs" data-single="tanninTexture"></div></div>
       </div>
       <div>
-        <div class="field"><label>Alcohol</label><div class="segs" data-single="alcohol"></div></div>
-        <div class="field"><label>Body</label><div class="segs" data-single="body"></div></div>
-        <div class="field"><label>Finish</label><div class="segs" data-single="finish"></div></div>
+        <div class="field"><label>Alcohol <span class="hint">1 low – 5 high</span></label><div class="segs" data-single="alcohol"></div></div>
+        <div class="field"><label>Body <span class="hint">1 light – 5 full</span></label><div class="segs" data-single="body"></div></div>
+        <div class="field"><label>Finish <span class="hint">1 short – 5 long</span></label><div class="segs" data-single="finish"></div></div>
       </div>
     </div>
   </section>
@@ -221,13 +288,24 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
     one. Always confirm against the actual label. This is not professional or commercial advice. Please enjoy wine responsibly,
     in moderation, and only if you are of legal drinking age.
     <br><br>
-    © 2026 SimiWine — created by Lian. All rights reserved. This tool, its design and its database are the creator's original
+    © 2026 SimiWine — created by MWKD Wine Boyz. All rights reserved. This tool, its design and its database are the creators' original
     work and <strong>may not be copied, replicated, redistributed or reproduced</strong>, in whole or in part, without written permission.
     <br><br>
-    ☕ <strong>Enjoyed SimiWine? Donations are warmly welcomed</strong> — they help keep it free and growing. Ask the creator for details.
+    ☕ <strong>Enjoyed SimiWine? Donations are warmly welcomed</strong> — they help keep it free and growing.
+    Contact: <a href="mailto:ai@bepc.com.sg" style="color:var(--wine)">ai@bepc.com.sg</a>.
     <br><br>
-    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.28-2230 (SGT) — last updated Sun 28 Jun 2026, 10:30&nbsp;pm</span>
+    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.28-2333 (SGT)</span>
   </p>
+  <div id="kofi-btn" style="text-align:center;margin:-6px 0 10px"></div>
+  <script src="https://storage.ko-fi.com/cdn/widget/Widget_2.js"></script>
+  <script>
+    try{
+      kofiwidget2.init('Support SimiWine on Ko-fi', '#b02b56', 'X3P72280D0');
+      var _k=document.getElementById('kofi-btn');
+      if(_k && typeof kofiwidget2.getHTML==='function'){ _k.innerHTML=kofiwidget2.getHTML(); }
+      else { kofiwidget2.draw(); }
+    }catch(e){}
+  </script>
 </div>
 
 <script>
@@ -236,11 +314,11 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
    ============================================================ */
 const SC = {
   intensity:["pale","medium","deep"],
-  level:["low","medium(-)","medium","medium(+)","high"],      // acidity, tannin, alcohol, nose intensity
-  body:["light","medium(-)","medium","medium(+)","full"],
+  level:["1","2","3","4","5"],      // acidity, tannin, alcohol, nose intensity — 1 lowest, 5 highest
+  body:["1","2","3","4","5"],        // 1 light, 5 full
   sweetness:["dry","off-dry","medium-dry","medium-sweet","sweet","luscious"],
   development:["youthful","developing","fully developed","tired"],
-  finish:["short","medium(-)","medium","medium(+)","long"]
+  finish:["1","2","3","4","5"]       // 1 short, 5 long
 };
 const COLOURS = {
   White:["lemon-green","lemon","gold","amber","brown"],
@@ -526,7 +604,283 @@ const DB = [
    ci:[2,2],ac:[2,3],tan:[0,0],bd:[3,4],al:[4,4],sw:[0,2],oak:false,age:"Very long-lived",
    ar:["kernel","dried_fruit","maturity"],
    prod:["Lustau","González Byass"],q:"very good",
-   why:"Deep amber, oxidative walnut/toffee, dried fig, full body, very high alcohol."}
+   why:"Deep amber, oxidative walnut/toffee, dried fig, full body, very high alcohol."},
+  // ---- BLENDS ----
+  {g:"GSM blend (Grenache-Shiraz-Mourvèdre)",r:"Barossa Valley, Australia",ctry:"Australia",cl:"Warm",type:"Red",
+   ci:[1,2],ac:[1,2],tan:[2,3],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"5–15 yrs",
+   ar:["red_fruit","black_fruit","dried_fruit","sweet_spice","oak"],
+   prod:["Torbreck","Charles Melton","Yangarra"],q:"very good",
+   why:"Warm berry-and-plum blend; soft medium-high tannin, high alcohol, sweet spice & vanilla oak."},
+  {g:"Côtes du Rhône (red blend)",r:"Southern Rhône, France",ctry:"France",cl:"Warm",type:"Red",
+   ci:[1,2],ac:[2,3],tan:[2,3],bd:[2,3],al:[2,3],sw:[0,0],oak:false,age:"2–8 yrs",
+   ar:["red_fruit","dried_fruit","herbal","pungent_spice"],
+   prod:["Guigal Côtes du Rhône","Ch. de Saint Cosme"],q:"good",
+   why:"Grenache-led: warm strawberry/plum with garrigue herbs & pepper, medium tannin, low-med acid."},
+  {g:"Bordeaux blend (Cab-Merlot, Left Bank)",r:"Médoc / Pauillac, Bordeaux",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"10–30 yrs",
+   ar:["black_fruit","herbaceous","oak","maturity"],
+   prod:["Ch. Lynch-Bages","Ch. Montrose","Ch. Gruaud Larose"],q:"outstanding",
+   why:"Cabernet-led: cassis & cedar with a leafy edge, firm tannin, cigar-box & lead-pencil with age."},
+  {g:"Super Tuscan (Cab/Merlot/Sangiovese)",r:"Bolgheri / Tuscany",ctry:"Italy",cl:"Moderate–warm",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,3],bd:[3,3],al:[2,3],sw:[0,0],oak:true,age:"8–25 yrs",
+   ar:["black_fruit","red_fruit","herbal","oak","maturity"],
+   prod:["Sassicaia","Tignanello","Ornellaia"],q:"outstanding",
+   why:"Polished international blend: ripe black fruit, sweet oak, firm tannin, Mediterranean herb lift."},
+  {g:"Cabernet-Shiraz blend",r:"South Australia",ctry:"Australia",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[1,2],tan:[3,3],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"6–18 yrs",
+   ar:["black_fruit","dried_fruit","sweet_spice","oak"],
+   prod:["Penfolds Bin 389","Wynns","Jim Barry"],q:"very good",
+   why:"Cassis + jammy blackberry, full body, high alcohol, ripe firm tannin, sweet mocha oak."},
+  {g:"Priorat (Garnacha-Cariñena)",r:"Priorat, Catalonia",ctry:"Spain",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[3,4],al:[3,4],sw:[0,0],oak:true,age:"6–20 yrs",
+   ar:["black_fruit","dried_fruit","mineral","oak"],
+   prod:["Clos Mogador","Álvaro Palacios"],q:"outstanding",
+   why:"Dense, powerful old-vine blend: dark fruit, liquorice & crushed-rock (llicorella) minerality, high alcohol."},
+  {g:"White Bordeaux (Sauvignon-Sémillon)",r:"Pessac-Léognan, Bordeaux",ctry:"France",cl:"Moderate",type:"White",
+   ci:[1,2],ac:[3,4],tan:[0,0],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"3–12 yrs",
+   ar:["citrus","stone_fruit","oak","autolytic"],
+   prod:["Ch. Smith Haut Lafitte","Domaine de Chevalier"],q:"very good",
+   why:"Citrus & waxy stone fruit with smoky barrel-ferment oak; high acid, textured, ageworthy."},
+  {g:"Rhône white blend (Marsanne-Roussanne-Viognier)",r:"Rhône, France",ctry:"France",cl:"Warm",type:"White",
+   ci:[1,2],ac:[1,2],tan:[0,0],bd:[3,4],al:[3,4],sw:[0,0],oak:true,age:"3–10 yrs",
+   ar:["stone_fruit","floral","tropical","kernel"],
+   prod:["M. Chapoutier","E. Guigal"],q:"very good",
+   why:"Full, oily, low-acid white: pear/apricot, honeysuckle, almond & subtle oak; high alcohol."},
+  // ---- MORE WHITES ----
+  {g:"Assyrtiko",r:"Santorini, Greece",ctry:"Greece",cl:"Warm island",type:"White",
+   ci:[0,1],ac:[4,4],tan:[0,0],bd:[1,2],al:[2,3],sw:[0,0],oak:false,age:"3–10 yrs",
+   ar:["citrus","green_fruit","mineral","stone_fruit"],
+   prod:["Sigalas","Argyros","Gaia Thalassitis"],q:"very good–outstanding",
+   why:"Bone-dry, electric high acid; lemon, green apple, sea-salt & smoky volcanic minerality."},
+  {g:"Furmint (dry)",r:"Tokaj, Hungary",ctry:"Hungary",cl:"Continental",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,2],al:[2,3],sw:[0,0],oak:true,age:"3–10 yrs",
+   ar:["citrus","green_fruit","stone_fruit","mineral"],
+   prod:["Oremus Mandolás","Royal Tokaji (dry)","Disznőkő"],q:"very good",
+   why:"High-acid green apple & pear with smoky, waxy, mineral character; takes subtle oak."},
+  {g:"Vermentino",r:"Sardinia, Italy",ctry:"Italy",cl:"Warm maritime",type:"White",
+   ci:[0,1],ac:[3,3],tan:[0,0],bd:[1,2],al:[2,2],sw:[0,0],oak:false,age:"1–3 yrs",
+   ar:["citrus","green_fruit","herbal","mineral"],
+   prod:["Argiolas","Capichera"],q:"good–very good",
+   why:"Zesty citrus & green almond with a herbal, saline coastal twist; crisp medium body."},
+  {g:"Verdejo",r:"Rueda, Spain",ctry:"Spain",cl:"Continental",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,2],al:[2,3],sw:[0,0],oak:false,age:"1–3 yrs",
+   ar:["citrus","green_fruit","herbaceous","herbal"],
+   prod:["José Pariente","Marqués de Riscal"],q:"good–very good",
+   why:"Citrus & fennel with a grassy, slightly bitter-almond finish; brisk high acid."},
+  {g:"Garganega (Soave)",r:"Veneto, Italy",ctry:"Italy",cl:"Moderate",type:"White",
+   ci:[0,1],ac:[3,3],tan:[0,0],bd:[1,2],al:[2,2],sw:[0,0],oak:false,age:"2–6 yrs",
+   ar:["floral","green_fruit","stone_fruit","kernel"],
+   prod:["Pieropan","Inama"],q:"good–very good",
+   why:"Delicate white blossom, pear & ripe lemon with a signature bitter-almond finish."},
+  {g:"Fiano",r:"Avellino, Campania",ctry:"Italy",cl:"Moderate–warm",type:"White",
+   ci:[1,2],ac:[2,3],tan:[0,0],bd:[2,3],al:[2,3],sw:[0,0],oak:false,age:"3–8 yrs",
+   ar:["stone_fruit","floral","kernel","mineral"],
+   prod:["Mastroberardino","Pietracupa"],q:"very good",
+   why:"Honeyed pear & hazelnut with smoky minerality; textured medium-full body that ages well."},
+  {g:"Torrontés",r:"Salta, Argentina",ctry:"Argentina",cl:"Warm high-altitude",type:"White",
+   ci:[0,1],ac:[2,3],tan:[0,0],bd:[1,2],al:[2,3],sw:[0,1],oak:false,age:"1–2 yrs",
+   ar:["floral","tropical","stone_fruit"],
+   prod:["Colomé","Crios (Mendel)"],q:"good",
+   why:"Perfumed rose & jasmine with peach and grape; aromatic on the nose but crisp and dry to taste."},
+  {g:"Muscadet (Melon de Bourgogne)",r:"Loire, France",ctry:"France",cl:"Cool",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,1],al:[1,2],sw:[0,0],oak:false,age:"1–5 yrs (sur lie)",
+   ar:["citrus","green_fruit","autolytic","mineral"],
+   prod:["Domaine de la Pépière","Luneau-Papin"],q:"good–very good",
+   why:"Lean, saline, high-acid lemon/green-apple; sur-lie texture & oyster-shell minerality."},
+  // ---- MORE REDS ----
+  {g:"Carmenère",r:"Colchagua, Chile",ctry:"Chile",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[2,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"4–12 yrs",
+   ar:["black_fruit","herbaceous","sweet_spice","oak"],
+   prod:["Concha y Toro Carmín","Montes Purple Angel"],q:"very good",
+   why:"Plummy black fruit with a signature green-pepper/soy savoury edge; soft-medium tannin, mocha oak."},
+  {g:"Mencía",r:"Bierzo, Spain",ctry:"Spain",cl:"Moderate",type:"Red",
+   ci:[1,2],ac:[3,3],tan:[2,3],bd:[1,2],al:[2,3],sw:[0,0],oak:true,age:"3–10 yrs",
+   ar:["red_fruit","floral","mineral","herbal"],
+   prod:["Descendientes de J. Palacios","Raúl Pérez"],q:"very good",
+   why:"Fragrant red cherry & violet over slate/graphite minerality; high acid, fine-grained tannin."},
+  {g:"Nerello Mascalese",r:"Etna, Sicily",ctry:"Italy",cl:"Moderate (altitude)",type:"Red",
+   ci:[0,1],ac:[3,4],tan:[3,3],bd:[1,2],al:[2,3],sw:[0,0],oak:true,age:"5–15 yrs",
+   ar:["red_fruit","floral","mineral","maturity"],
+   prod:["Passopisciaro","Benanti","Graci"],q:"very good–outstanding",
+   why:"Pale, Nebbiolo-like: red cherry, dried herbs, crushed volcanic rock & ash; high acid, firm tannin."},
+  {g:"Aglianico",r:"Taurasi, Campania",ctry:"Italy",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[3,4],tan:[4,4],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"8–25 yrs",
+   ar:["black_fruit","dried_fruit","pungent_spice","maturity","oak"],
+   prod:["Mastroberardino Radici","Feudi di San Gregorio"],q:"outstanding",
+   why:"The 'Barolo of the south': black cherry/plum, tar, leather & ash; very high tannin and acid."},
+  {g:"Xinomavro",r:"Naoussa, Greece",ctry:"Greece",cl:"Moderate",type:"Red",
+   ci:[0,1],ac:[4,4],tan:[4,4],bd:[1,2],al:[2,3],sw:[0,0],oak:true,age:"6–20 yrs",
+   ar:["red_fruit","dried_fruit","herbal","maturity"],
+   prod:["Thymiopoulos","Kir-Yianni","Boutari"],q:"very good–outstanding",
+   why:"Pale but ferociously structured: sour red cherry, tomato, black olive, dried herb; searing acid & tannin."},
+  {g:"Barbera",r:"Piedmont, Italy",ctry:"Italy",cl:"Moderate",type:"Red",
+   ci:[1,2],ac:[4,4],tan:[1,2],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"2–10 yrs",
+   ar:["red_fruit","black_fruit","floral","oak"],
+   prod:["Vietti","G.D. Vajra","Braida"],q:"very good",
+   why:"Juicy red & black cherry with bright high acid and notably low, soft tannin; sometimes oak-aged."},
+  {g:"Dolcetto",r:"Piedmont, Italy",ctry:"Italy",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[1,2],tan:[2,3],bd:[2,2],al:[2,2],sw:[0,0],oak:false,age:"1–4 yrs",
+   ar:["black_fruit","red_fruit","floral","kernel"],
+   prod:["G.D. Vajra","Pecchenino"],q:"good",
+   why:"Deep purple, juicy blackberry/plum, low acid, grippy medium tannin and a bitter-almond finish."},
+  {g:"Blaufränkisch",r:"Burgenland, Austria",ctry:"Austria",cl:"Moderate",type:"Red",
+   ci:[1,2],ac:[3,4],tan:[2,3],bd:[2,2],al:[2,3],sw:[0,0],oak:true,age:"4–12 yrs",
+   ar:["red_fruit","black_fruit","pungent_spice","mineral"],
+   prod:["Moric","Heinrich"],q:"very good",
+   why:"Dark cherry & blackberry with white-pepper spice and stony minerality; high acid, medium-firm tannin."},
+  {g:"Tannat",r:"Madiran, France",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[4,4],bd:[3,4],al:[2,3],sw:[0,0],oak:true,age:"8–20 yrs",
+   ar:["black_fruit","dried_fruit","oak","pungent_spice"],
+   prod:["Ch. Montus (Brumont)","Ch. Bouscassé"],q:"very good",
+   why:"Inky and massively tannic blackberry/blackcurrant with smoke & liquorice; needs age or rich food."},
+  {g:"Petite Sirah",r:"California, USA",ctry:"USA",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"5–15 yrs",
+   ar:["black_fruit","dried_fruit","pungent_spice","oak"],
+   prod:["Ridge","Stags' Leap Winery"],q:"good–very good",
+   why:"Opaque, dense blueberry/blackberry, high tannin & alcohol, black pepper and chocolate oak."},
+  {g:"Saperavi",r:"Kakheti, Georgia",ctry:"Georgia",cl:"Continental",type:"Red",
+   ci:[2,2],ac:[3,4],tan:[3,4],bd:[3,3],al:[2,3],sw:[0,1],oak:true,age:"5–15 yrs",
+   ar:["black_fruit","dried_fruit","pungent_spice","maturity"],
+   prod:["Pheasant's Tears","Schuchmann"],q:"very good",
+   why:"Inky teinturier red: dark plum/blackberry, high acid & tannin, spice; qvevri styles turn savoury."},
+  {g:"Primitivo",r:"Puglia, Italy",ctry:"Italy",cl:"Warm",type:"Red",
+   ci:[1,2],ac:[1,2],tan:[2,3],bd:[3,4],al:[4,4],sw:[0,1],oak:true,age:"2–8 yrs",
+   ar:["red_fruit","dried_fruit","sweet_spice","oak"],
+   prod:["Gianfranco Fino","Felline"],q:"good–very good",
+   why:"Jammy raisined cherry/plum, very high alcohol, soft tannin & sweet baking spice (Zinfandel's twin)."},
+  {g:"Grenache (old-vine varietal)",r:"McLaren Vale, Australia",ctry:"Australia",cl:"Warm",type:"Red",
+   ci:[0,1],ac:[1,2],tan:[1,2],bd:[2,3],al:[3,4],sw:[0,1],oak:false,age:"3–10 yrs",
+   ar:["red_fruit","dried_fruit","sweet_spice","herbal"],
+   prod:["Yangarra","d'Arenberg"],q:"very good",
+   why:"Pale but powerful: sweet strawberry/raspberry, white pepper & dried herb; high alcohol, low-med soft tannin."},
+  {g:"Mourvèdre (Bandol)",r:"Bandol, Provence",ctry:"France",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[3,3],al:[2,3],sw:[0,0],oak:true,age:"8–20 yrs",
+   ar:["black_fruit","animal","herbal","pungent_spice"],
+   prod:["Domaine Tempier","Ch. Pradeaux"],q:"outstanding",
+   why:"Dense, savoury blackberry with leather, game, garrigue & pepper; firm tannin, ages superbly."},
+  // ---- SWEET / BOTRYTIS / DESSERT ----
+  {g:"Sauternes (botrytis Sémillon)",r:"Sauternes, Bordeaux",ctry:"France",cl:"Moderate",type:"White",
+   ci:[1,2],ac:[3,4],tan:[0,0],bd:[3,4],al:[2,3],sw:[5,5],oak:true,age:"10–30+ yrs",
+   ar:["stone_fruit","dried_fruit","maturity","sweet_spice","kernel","tropical"],
+   prod:["Ch. d'Yquem","Ch. Climens","Ch. Rieussec","Ch. Suduiraut"],q:"outstanding",
+   why:"Botrytis nectar: honeyed apricot, marmalade, mango, ginger & saffron; luscious but lifted by high acid."},
+  {g:"Tokaji Aszú",r:"Tokaj, Hungary",ctry:"Hungary",cl:"Continental",type:"White",
+   ci:[1,2],ac:[4,4],tan:[0,0],bd:[2,3],al:[1,2],sw:[4,5],oak:true,age:"15–40 yrs",
+   ar:["dried_fruit","stone_fruit","maturity","kernel","sweet_spice"],
+   prod:["Royal Tokaji","Disznőkő","Oremus","Királyudvar"],q:"outstanding",
+   why:"Orange marmalade, dried apricot, marzipan & walnut with electric acidity balancing intense sweetness."},
+  {g:"Riesling BA/TBA (botrytis)",r:"Mosel / Pfalz, Germany",ctry:"Germany",cl:"Cool",type:"White",
+   ci:[1,2],ac:[4,4],tan:[0,0],bd:[2,3],al:[0,1],sw:[4,5],oak:false,age:"20–50 yrs",
+   ar:["stone_fruit","dried_fruit","floral","maturity","mineral"],
+   prod:["Egon Müller","JJ Prüm","Dönnhoff"],q:"outstanding",
+   why:"Concentrated apricot, honey & botrytis with piercing acidity and very low alcohol; near-ageless."},
+  {g:"Ice Wine / Eiswein",r:"Niagara, Canada",ctry:"Canada",cl:"Cool",type:"White",
+   ci:[1,2],ac:[4,4],tan:[0,0],bd:[2,3],al:[0,1],sw:[5,5],oak:false,age:"5–15 yrs",
+   ar:["tropical","stone_fruit","floral","kernel"],
+   prod:["Inniskillin","Pillitteri"],q:"very good–outstanding",
+   why:"Pure, vibrant sweetness from frozen grapes: mango, peach & honey with zippy fresh acid."},
+  {g:"Vin Santo",r:"Tuscany, Italy",ctry:"Italy",cl:"Moderate",type:"White",
+   ci:[2,2],ac:[2,3],tan:[0,0],bd:[3,4],al:[3,3],sw:[3,5],oak:true,age:"very long-lived",
+   ar:["dried_fruit","kernel","maturity","sweet_spice"],
+   prod:["Avignonesi","Isole e Olena"],q:"very good–outstanding",
+   why:"Oxidative passito: dried fig, date, caramel, roasted nut & orange peel; rich and nutty."},
+  {g:"Recioto della Valpolicella",r:"Veneto, Italy",ctry:"Italy",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[2,3],bd:[3,4],al:[2,3],sw:[4,5],oak:true,age:"10–20 yrs",
+   ar:["dried_fruit","black_fruit","sweet_spice","kernel"],
+   prod:["Quintarelli","Allegrini"],q:"very good–outstanding",
+   why:"Sweet dried-grape red: cherry-in-syrup, raisin, chocolate & spice; the sweet ancestor of Amarone."},
+  {g:"Pedro Ximénez (PX)",r:"Montilla / Jerez, Spain",ctry:"Spain",cl:"Warm",type:"Fortified",
+   ci:[2,2],ac:[1,2],tan:[0,0],bd:[4,4],al:[3,4],sw:[5,5],oak:false,age:"decades",
+   ar:["dried_fruit","kernel","maturity"],
+   prod:["Alvear","González Byass Nectar","Lustau"],q:"very good",
+   why:"Black, viscous and intensely sweet: raisin, fig, date, molasses, coffee & liquorice."},
+  {g:"Moscato d'Asti",r:"Piedmont, Italy",ctry:"Italy",cl:"Moderate",type:"Sparkling",
+   ci:[0,1],ac:[2,3],tan:[0,0],bd:[0,1],al:[0,0],sw:[3,4],oak:false,age:"drink young",
+   ar:["floral","tropical","green_fruit","stone_fruit"],
+   prod:["Saracco","Vietti Cascinetta"],q:"good",
+   why:"Gently fizzy, low-alcohol & sweet: grape, orange blossom, peach & elderflower; delicate frothy mousse."},
+  {g:"Gewürztraminer Vendange Tardive",r:"Alsace, France",ctry:"France",cl:"Cool",type:"White",
+   ci:[1,2],ac:[1,2],tan:[0,0],bd:[3,4],al:[3,4],sw:[3,4],oak:false,age:"5–15 yrs",
+   ar:["floral","tropical","sweet_spice","dried_fruit"],
+   prod:["Zind-Humbrecht","Trimbach"],q:"very good",
+   why:"Opulent off-sweet lychee, rose, ginger & honeyed apricot; full, oily, low acid."},
+  // ---- BURGUNDY (village/commune detail) ----
+  {g:"Chablis Grand Cru",r:"Chablis, Burgundy",ctry:"France",cl:"Cool",type:"White",
+   ci:[1,2],ac:[3,4],tan:[0,0],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"5–15 yrs",
+   ar:["citrus","stone_fruit","oak","mineral","kernel"],
+   prod:["Raveneau","Dauvissat","William Fèvre (GC)"],q:"outstanding",
+   why:"Fuller, age-worthy Chablis: lemon & white peach with flinty 'gunsmoke' minerality and subtle oak."},
+  {g:"Meursault",r:"Côte de Beaune, Burgundy",ctry:"France",cl:"Cool–moderate",type:"White",
+   ci:[1,2],ac:[2,3],tan:[0,0],bd:[3,4],al:[2,3],sw:[0,0],oak:true,age:"5–15 yrs",
+   ar:["stone_fruit","oak","dairy","kernel","maturity"],
+   prod:["Coche-Dury","Roulot","Comtes Lafon"],q:"outstanding",
+   why:"Rich, broad white Burgundy: ripe peach, hazelnut, butter & toasted oak; rounder and lower-acid than Puligny."},
+  {g:"Puligny-Montrachet",r:"Côte de Beaune, Burgundy",ctry:"France",cl:"Cool–moderate",type:"White",
+   ci:[1,2],ac:[3,4],tan:[0,0],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"5–15 yrs",
+   ar:["citrus","stone_fruit","floral","oak","mineral"],
+   prod:["Leflaive","Sauzet","Louis Carillon"],q:"outstanding",
+   why:"Tense, precise white Burgundy: citrus, white flower & struck-flint with refined oak; higher acid than Meursault."},
+  {g:"Pouilly-Fuissé (Mâconnais)",r:"Mâconnais, Burgundy",ctry:"France",cl:"Moderate",type:"White",
+   ci:[1,2],ac:[2,3],tan:[0,0],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"3–8 yrs",
+   ar:["stone_fruit","citrus","oak","kernel"],
+   prod:["Château Fuissé","Daniel Barraud"],q:"very good",
+   why:"Riper, rounder, value white Burgundy: yellow apple & peach with gentle oak and soft acidity."},
+  {g:"Gevrey-Chambertin (Côte de Nuits)",r:"Côte de Nuits, Burgundy",ctry:"France",cl:"Cool",type:"Red",
+   ci:[1,2],ac:[3,4],tan:[2,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"8–20 yrs",
+   ar:["black_fruit","red_fruit","maturity","oak","animal"],
+   prod:["Armand Rousseau","Denis Mortet"],q:"outstanding",
+   why:"The most structured, darkest-fruited Pinot: black cherry, earth & game with firmer tannin than southern Burgundy."},
+  {g:"Vosne-Romanée (Côte de Nuits)",r:"Côte de Nuits, Burgundy",ctry:"France",cl:"Cool",type:"Red",
+   ci:[1,1],ac:[3,4],tan:[2,3],bd:[2,2],al:[2,3],sw:[0,0],oak:true,age:"8–25 yrs",
+   ar:["red_fruit","black_fruit","sweet_spice","floral","maturity","oak"],
+   prod:["DRC","Méo-Camuzet","Leroy"],q:"outstanding",
+   why:"Opulent, spiced Pinot: red & black cherry, exotic spice, violet & forest floor; silky yet deep."},
+  {g:"Volnay (Côte de Beaune)",r:"Côte de Beaune, Burgundy",ctry:"France",cl:"Cool",type:"Red",
+   ci:[0,1],ac:[3,4],tan:[1,2],bd:[1,2],al:[2,3],sw:[0,0],oak:true,age:"5–15 yrs",
+   ar:["red_fruit","floral","maturity"],
+   prod:["Marquis d'Angerville","de Montille"],q:"very good–outstanding",
+   why:"The most perfumed, silky Côte de Beaune red: red cherry, rose & violet with delicate light-medium tannin."},
+  {g:"Pommard (Côte de Beaune)",r:"Côte de Beaune, Burgundy",ctry:"France",cl:"Cool",type:"Red",
+   ci:[1,2],ac:[3,4],tan:[3,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"6–18 yrs",
+   ar:["red_fruit","black_fruit","maturity","animal","oak"],
+   prod:["Comte Armand","de Courcel"],q:"very good",
+   why:"The firmest, most rustic Côte de Beaune red: dark cherry & earth with notably grippy tannin."},
+  // ---- BORDEAUX (commune detail) ----
+  {g:"Pauillac (Cabernet-dominant)",r:"Pauillac, Médoc",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[4,4],bd:[3,3],al:[2,3],sw:[0,0],oak:true,age:"15–40 yrs",
+   ar:["black_fruit","oak","sweet_spice","maturity","mineral"],
+   prod:["Ch. Latour","Ch. Mouton Rothschild","Ch. Lynch-Bages"],q:"outstanding",
+   why:"The most powerful Médoc: blackcurrant, cedar, graphite & lead-pencil; very high tannin, decades of ageing."},
+  {g:"Margaux (perfumed Médoc)",r:"Margaux, Médoc",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"12–30 yrs",
+   ar:["black_fruit","red_fruit","floral","oak","maturity"],
+   prod:["Ch. Margaux","Ch. Palmer"],q:"outstanding",
+   why:"The most fragrant, elegant Médoc: cassis & violet with silky, refined tannin; perfume over power."},
+  {g:"Saint-Julien (Médoc)",r:"Saint-Julien, Médoc",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"12–30 yrs",
+   ar:["black_fruit","oak","sweet_spice","maturity"],
+   prod:["Ch. Léoville Las Cases","Ch. Ducru-Beaucaillou"],q:"outstanding",
+   why:"The classic, balanced Médoc: cassis, cedar & cigar-box, poised between Pauillac power and Margaux grace."},
+  {g:"Saint-Estèphe (Médoc)",r:"Saint-Estèphe, Médoc",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[3,3],tan:[4,4],bd:[3,3],al:[2,3],sw:[0,0],oak:true,age:"15–35 yrs",
+   ar:["black_fruit","herbaceous","maturity","oak","mineral"],
+   prod:["Ch. Montrose","Ch. Cos d'Estournel"],q:"outstanding",
+   why:"The firmest, most earthy Médoc: dense blackcurrant, fresh acidity, clay-driven grip & savoury structure."},
+  {g:"Pomerol (Merlot-dominant)",r:"Pomerol, Bordeaux",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[2,3],bd:[3,3],al:[2,3],sw:[0,0],oak:true,age:"10–30 yrs",
+   ar:["red_fruit","black_fruit","oak","maturity","mineral"],
+   prod:["Ch. Pétrus","Le Pin","Vieux Château Certan"],q:"outstanding",
+   why:"Plush, opulent Merlot on iron-clay: plum & black cherry, truffle, violet & a ferrous mineral note; velvety tannin."},
+  {g:"Saint-Émilion (Merlot-Cab Franc)",r:"Saint-Émilion, Bordeaux",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[2,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"8–25 yrs",
+   ar:["red_fruit","black_fruit","floral","oak","maturity"],
+   prod:["Ch. Cheval Blanc","Ch. Ausone","Ch. Canon"],q:"outstanding",
+   why:"Merlot lifted by Cabernet Franc: red plum & black cherry, violet, graphite & fresh acidity; supple yet structured."},
+  {g:"Pessac-Léognan (red Graves)",r:"Pessac-Léognan, Bordeaux",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"10–25 yrs",
+   ar:["black_fruit","oak","animal","maturity","mineral"],
+   prod:["Ch. Haut-Brion","Ch. Smith Haut Lafitte"],q:"outstanding",
+   why:"Gravelly Graves red: warm cassis with a smoky, earthy 'warm-brick' tobacco character; firm but refined."}
 ];
 /* Typical glass colour(s) per wine — keyed by grape|region (used in scoring + display) */
 const COL = {
@@ -568,7 +922,61 @@ const COL = {
   "Pinotage|Stellenbosch, South Africa":["ruby","purple"],
   "Port (Ruby/LBV)|Douro, Portugal":["ruby","purple"],
   "Sherry (Fino/Manzanilla)|Jerez, Spain":["gold"],
-  "Sherry (Oloroso)|Jerez, Spain":["amber","tawny","brown"]
+  "Sherry (Oloroso)|Jerez, Spain":["amber","tawny","brown"],
+  "GSM blend (Grenache-Shiraz-Mourvèdre)|Barossa Valley, Australia":["ruby","purple"],
+  "Côtes du Rhône (red blend)|Southern Rhône, France":["ruby","purple"],
+  "Bordeaux blend (Cab-Merlot, Left Bank)|Médoc / Pauillac, Bordeaux":["ruby","garnet"],
+  "Super Tuscan (Cab/Merlot/Sangiovese)|Bolgheri / Tuscany":["ruby","purple"],
+  "Cabernet-Shiraz blend|South Australia":["purple","ruby"],
+  "Priorat (Garnacha-Cariñena)|Priorat, Catalonia":["purple","ruby"],
+  "White Bordeaux (Sauvignon-Sémillon)|Pessac-Léognan, Bordeaux":["lemon","gold"],
+  "Rhône white blend (Marsanne-Roussanne-Viognier)|Rhône, France":["gold","lemon"],
+  "Assyrtiko|Santorini, Greece":["lemon-green","lemon"],
+  "Furmint (dry)|Tokaj, Hungary":["lemon","lemon-green"],
+  "Vermentino|Sardinia, Italy":["lemon-green","lemon"],
+  "Verdejo|Rueda, Spain":["lemon-green","lemon"],
+  "Garganega (Soave)|Veneto, Italy":["lemon-green","lemon"],
+  "Fiano|Avellino, Campania":["lemon","gold"],
+  "Torrontés|Salta, Argentina":["lemon","lemon-green"],
+  "Muscadet (Melon de Bourgogne)|Loire, France":["lemon-green","lemon"],
+  "Carmenère|Colchagua, Chile":["purple","ruby"],
+  "Mencía|Bierzo, Spain":["ruby","purple"],
+  "Nerello Mascalese|Etna, Sicily":["ruby","garnet"],
+  "Aglianico|Taurasi, Campania":["ruby","garnet"],
+  "Xinomavro|Naoussa, Greece":["ruby","garnet"],
+  "Barbera|Piedmont, Italy":["ruby","purple"],
+  "Dolcetto|Piedmont, Italy":["purple","ruby"],
+  "Blaufränkisch|Burgenland, Austria":["ruby","purple"],
+  "Tannat|Madiran, France":["purple","ruby"],
+  "Petite Sirah|California, USA":["purple","ruby"],
+  "Saperavi|Kakheti, Georgia":["purple","ruby"],
+  "Primitivo|Puglia, Italy":["ruby","purple"],
+  "Grenache (old-vine varietal)|McLaren Vale, Australia":["ruby","garnet"],
+  "Mourvèdre (Bandol)|Bandol, Provence":["purple","ruby"],
+  "Sauternes (botrytis Sémillon)|Sauternes, Bordeaux":["gold","amber"],
+  "Tokaji Aszú|Tokaj, Hungary":["gold","amber"],
+  "Riesling BA/TBA (botrytis)|Mosel / Pfalz, Germany":["gold","amber"],
+  "Ice Wine / Eiswein|Niagara, Canada":["gold","lemon"],
+  "Vin Santo|Tuscany, Italy":["amber","gold"],
+  "Recioto della Valpolicella|Veneto, Italy":["garnet","tawny"],
+  "Pedro Ximénez (PX)|Montilla / Jerez, Spain":["brown","tawny"],
+  "Moscato d'Asti|Piedmont, Italy":["lemon-green","lemon"],
+  "Gewürztraminer Vendange Tardive|Alsace, France":["gold","amber"],
+  "Chablis Grand Cru|Chablis, Burgundy":["lemon","gold"],
+  "Meursault|Côte de Beaune, Burgundy":["gold","lemon"],
+  "Puligny-Montrachet|Côte de Beaune, Burgundy":["lemon","gold"],
+  "Pouilly-Fuissé (Mâconnais)|Mâconnais, Burgundy":["lemon","gold"],
+  "Gevrey-Chambertin (Côte de Nuits)|Côte de Nuits, Burgundy":["ruby","garnet"],
+  "Vosne-Romanée (Côte de Nuits)|Côte de Nuits, Burgundy":["ruby","garnet"],
+  "Volnay (Côte de Beaune)|Côte de Beaune, Burgundy":["ruby","garnet"],
+  "Pommard (Côte de Beaune)|Côte de Beaune, Burgundy":["ruby","garnet"],
+  "Pauillac (Cabernet-dominant)|Pauillac, Médoc":["ruby","garnet"],
+  "Margaux (perfumed Médoc)|Margaux, Médoc":["ruby","garnet"],
+  "Saint-Julien (Médoc)|Saint-Julien, Médoc":["ruby","garnet"],
+  "Saint-Estèphe (Médoc)|Saint-Estèphe, Médoc":["garnet","ruby"],
+  "Pomerol (Merlot-dominant)|Pomerol, Bordeaux":["ruby","garnet"],
+  "Saint-Émilion (Merlot-Cab Franc)|Saint-Émilion, Bordeaux":["ruby","garnet"],
+  "Pessac-Léognan (red Graves)|Pessac-Léognan, Bordeaux":["ruby","garnet"]
 };
 DB.forEach(w=>{ w.col = COL[w.g+"|"+w.r] || []; });
 
@@ -587,6 +995,7 @@ function buildSegs(sel,key,arr){
     state[key]= state[key]===v? null : v;
     host.querySelectorAll('.seg').forEach(x=>x.classList.toggle('on',x.dataset.val===state[key]));
     if(key==='type')refreshColour();
+    updateGlass();
   };host.appendChild(s);});
 }
 const TYPES=["Red","White","Rosé","Sparkling","Fortified"];
@@ -637,6 +1046,7 @@ function refreshColour(){
         if(already){ state.colour=null; state.intensity=null; note.textContent='Tap the shade that matches your glass.'; }
         else{ state.colour=hue; state.intensity=depth; cell.classList.add('on');
           note.innerHTML=`Selected: <b>${depth} ${hue}</b> — ${esc((HUE_NOTE[hue]||'').replace(/^[^—]*—\s*/,''))}`; }
+        updateGlass();
       };
       row.appendChild(cell);
     });
@@ -675,6 +1085,30 @@ function buildAgeAppearance(){
     });
     sedField.style.display='';
   } else { sedField.style.display='none'; }
+}
+
+// live animated glass — reflects type, colour+depth, body/alcohol (legs) and fizz
+function updateGlass(){
+  const svg=document.getElementById('glassSvg'); if(!svg) return;
+  const liquid=document.getElementById('wineLiquid');
+  const men=document.getElementById('wineMeniscus');
+  const wineG=document.getElementById('wineGroup');
+  const cap=document.getElementById('glassCap');
+  if(state.type && state.colour){
+    const base=shade(HEX[state.colour]||'#ccc', state.intensity||'medium');
+    liquid.setAttribute('fill',base);
+    men.setAttribute('fill',shade(HEX[state.colour]||'#ccc','pale'));
+    svg.style.setProperty('--wl',base);
+    wineG.style.opacity='1';
+    cap.textContent=((state.intensity||'')+' '+(state.colour||'')).trim();
+  } else if(state.type){
+    wineG.style.opacity='0.12'; cap.textContent='tap a colour to pour';
+  } else {
+    wineG.style.opacity='0'; cap.textContent='pick a wine type';
+  }
+  const legScore=(+state.alcohol||0)+(+state.body||0);
+  svg.setAttribute('data-legs', legScore>=8?'high':legScore>=5?'med':'low');
+  svg.setAttribute('data-fizz', state.type==='Sparkling'?'1':'0');
 }
 
 // aroma lexicon — one button per descriptor, grouped under its cluster prefix
@@ -946,6 +1380,7 @@ function setEngineBadge(){
   else{t.textContent='Offline expert engine (built-in database)';}
 }
 setEngineBadge();
+updateGlass();
 
 const go=document.getElementById('goBtn');
 go.onclick=async()=>{
@@ -969,6 +1404,7 @@ document.getElementById('resetBtn').onclick=()=>{
   document.getElementById('out').innerHTML='';
   const sb=document.getElementById('aromaSearch'); if(sb){sb.value='';sb.dispatchEvent(new Event('input'));}
   updateSelCount();
+  updateGlass();
   window.scrollTo({top:0,behavior:'smooth'});
 };
 </script>
