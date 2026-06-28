@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimiWine — Blind Tasting Detective</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#faf7f4; --card:#ffffff; --ink:#2a1b22; --muted:#7a6b72;
+  --wine:#6b1f33; --wine2:#8c2b46; --gold:#b8893b; --line:#e7ddd9;
+  --chip:#f3ece9; --chip-on:#6b1f33; --good:#2e7d52; --warn:#b8893b;
+  --shadow:0 1px 3px rgba(60,20,30,.08),0 8px 24px rgba(60,20,30,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 20px 80px}
+header.hero{text-align:center;padding:18px 0 8px}
+.logo{font-size:13px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);font-weight:700}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;color:var(--wine);letter-spacing:-.5px}
+.tag{color:var(--muted);font-size:15px;font-style:italic;margin:0}
+.engine-badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:12px;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--muted);box-shadow:var(--shadow)}
+.dot{width:8px;height:8px;border-radius:50%;background:#bbb}
+.dot.on{background:var(--good)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.card h2{font-family:Georgia,serif;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--wine);margin:0 0 4px;display:flex;align-items:center;gap:8px}
+.card h2 .n{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--wine);color:#fff;font-size:12px;align-items:center;justify-content:center;font-family:sans-serif}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+.field{margin:14px 0}
+.field>label{display:block;font-weight:600;font-size:13px;margin-bottom:7px}
+.field>label .hint{font-weight:400;color:var(--muted);font-size:11.5px;margin-left:6px}
+.segs{display:flex;flex-wrap:wrap;gap:6px}
+.seg{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 11px;font-size:12.5px;cursor:pointer;color:var(--ink);transition:.12s;user-select:none}
+.seg:hover{border-color:var(--wine2)}
+.seg.on{background:var(--wine);border-color:var(--wine);color:#fff;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer;transition:.12s;user-select:none}
+.chip:hover{border-color:var(--wine2)}
+.chip.on{background:var(--chip-on);color:#fff;border-color:var(--chip-on);font-weight:600}
+.chip small{display:block;font-size:9.5px;opacity:.7;font-weight:400}
+.chip .ptag{font-size:9px;text-transform:uppercase;letter-spacing:.06em;background:rgba(107,31,51,.09);color:var(--wine);
+  border-radius:5px;padding:1px 5px;margin-right:5px;font-weight:700;vertical-align:1px}
+.chip.on .ptag{background:rgba(255,255,255,.22);color:#fff}
+.clustergroup{margin-bottom:12px}
+.clustergroup .gl{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);font-weight:700;margin:0 0 6px}
+.aromabar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+#aromaSearch{flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--ink)}
+#aromaSearch:focus{outline:none;border-color:var(--wine2);box-shadow:0 0 0 3px rgba(107,31,51,.1)}
+.selcount{font-size:12px;color:var(--muted);white-space:nowrap}
+.mini{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font-size:12px;cursor:pointer;color:var(--wine);font-family:inherit}
+.mini:hover{border-color:var(--wine2)}
+.lexsection{margin-bottom:14px}
+.lexsection .sl{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);font-weight:700;margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.lexgroup{margin-bottom:9px}
+.lexgroup .gp{font-size:11.5px;font-weight:700;color:var(--wine);margin:0 0 5px}
+.noresult{color:var(--muted);font-style:italic;font-size:13px;text-align:center;padding:14px}
+.actions{position:sticky;bottom:0;margin-top:24px;display:flex;gap:12px;align-items:center;justify-content:center;
+  background:linear-gradient(transparent,var(--bg) 40%);padding:18px 0 4px}
+.btn{border:none;border-radius:12px;padding:14px 30px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit}
+.btn.primary{background:var(--wine);color:#fff;box-shadow:var(--shadow)}
+.btn.primary:hover{background:var(--wine2)}
+.btn.ghost{background:#fff;color:var(--wine);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+#out{margin-top:26px}
+.verdict{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.verdict .vhead{background:linear-gradient(135deg,var(--wine),#4d1626);color:#fff;padding:20px 24px}
+.verdict .vhead .kicker{font-size:11px;letter-spacing:.28em;text-transform:uppercase;opacity:.8}
+.verdict .vhead h3{font-family:Georgia,serif;font-size:26px;margin:4px 0 2px}
+.verdict .vhead .vsub{opacity:.92;font-size:14px}
+.vbody{padding:20px 24px}
+.match{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.match.lead{border-color:var(--gold);background:#fffdf8}
+.match .mtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.match .gname{font-family:Georgia,serif;font-size:19px;color:var(--wine);font-weight:700}
+.match .gregion{color:var(--muted);font-size:13px}
+.conf{min-width:140px}
+.conf .bar{height:9px;background:var(--chip);border-radius:99px;overflow:hidden}
+.conf .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--wine));border-radius:99px}
+.conf .lab{font-size:11px;color:var(--muted);text-align:right;margin-top:3px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.pill{background:var(--chip);border-radius:8px;padding:4px 9px;font-size:11.5px;color:var(--ink)}
+.pill b{color:var(--wine)}
+.reason{font-size:13px;color:#4a3b41;margin:8px 0 0}
+.prod{font-size:12.5px;color:var(--muted);margin-top:8px}
+.prod b{color:var(--ink)}
+.concl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px}
+@media(max-width:680px){.concl{grid-template-columns:1fr}}
+.concl .cc{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.concl .cc .t{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);font-weight:700}
+.concl .cc .v{font-size:13.5px;margin-top:3px}
+.spin{display:inline-block;width:18px;height:18px;border:3px solid #fff6;border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{color:var(--muted);text-align:center;padding:30px;font-style:italic}
+.footnote{color:var(--muted);font-size:11.5px;text-align:center;margin-top:30px;line-height:1.6}
+.colourrow{display:none}
+.colourrow.show{display:block}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.sw{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:78px;user-select:none}
+.sw .disc{width:46px;height:46px;border-radius:50%;border:2px solid rgba(0,0,0,.12);box-shadow:inset 0 -6px 10px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.12);transition:.12s}
+.sw .nm{font-size:11.5px;text-align:center;line-height:1.2}
+.sw .nt{font-size:9.5px;color:var(--muted);text-align:center;line-height:1.15}
+.sw:hover .disc{transform:scale(1.07)}
+.sw.on .disc{border-color:var(--wine);box-shadow:0 0 0 3px rgba(107,31,51,.25),inset 0 -6px 10px rgba(0,0,0,.18)}
+.sw.on .nm{font-weight:700;color:var(--wine)}
+.swatch-out{display:inline-flex;align-items:center;gap:8px;margin-top:2px}
+.swatch-out .disc{width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(0,0,0,.15);box-shadow:inset 0 -4px 6px rgba(0,0,0,.18)}
+/* hue × depth colour grid */
+.huegrid{margin-top:4px}
+.hg-head,.hg-row{display:grid;grid-template-columns:104px repeat(3,1fr);gap:8px;align-items:center}
+.hg-head{margin-bottom:6px}
+.hg-head span{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);text-align:center}
+.hg-head span:first-child{text-align:left}
+.hg-row{margin-bottom:6px}
+.hg-label{font-size:12.5px;font-weight:600;text-transform:capitalize}
+.cell{display:flex;justify-content:center;cursor:pointer;padding:4px;border-radius:11px;border:2px solid transparent;transition:.12s}
+.cell:hover{border-color:var(--line);background:#faf6f3}
+.cell.on{border-color:var(--wine);background:#fdf5f7;box-shadow:0 0 0 2px rgba(107,31,51,.12)}
+.cell .disc{width:100%;max-width:62px;height:34px;border-radius:8px;border:1px solid rgba(0,0,0,.14);box-shadow:inset 0 -6px 9px rgba(0,0,0,.18),inset 0 2px 3px rgba(255,255,255,.25)}
+.hg-note{margin-top:10px;font-size:12px;color:#5a4a50;min-height:18px;font-style:italic}
+.hg-note b{color:var(--wine);font-style:normal}
+@media(max-width:560px){.hg-head,.hg-row{grid-template-columns:72px repeat(3,1fr);gap:5px}.cell .disc{height:30px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>🍷 SimiWine</h1>
+    <p class="tag">The blind-tasting detective — describe what's in your glass and let's deduce the grape, region &amp; style.</p>
+    <div class="engine-badge"><span class="dot" id="engineDot"></span><span id="engineText">Detecting engine…</span></div>
+  </header>
+
+  <div class="grid">
+    <!-- APPEARANCE -->
+    <section class="card">
+      <h2><span class="n">1</span> Appearance</h2>
+      <p class="sub">What does the wine look like in the glass?</p>
+      <div class="field"><label>Wine type</label>
+        <div class="segs" data-single="type" id="typeRow"></div></div>
+      <div class="field colourrow" id="colourField">
+        <label>Colour <span class="hint">tap the shade that matches your glass — sets hue + depth</span></label>
+        <div class="huegrid" id="hueGrid"></div>
+        <div class="hg-note" id="hueNote">Pick a wine type to see its colour range.</div></div>
+    </section>
+
+    <!-- NOSE -->
+    <section class="card">
+      <h2><span class="n">2</span> Nose</h2>
+      <p class="sub">Aroma intensity, development and character.</p>
+      <div class="field"><label>Aroma intensity</label>
+        <div class="segs" data-single="nintensity"></div></div>
+      <div class="field"><label>Development</label>
+        <div class="segs" data-single="development"></div></div>
+    </section>
+  </div>
+
+  <!-- PALATE STRUCTURE -->
+  <section class="card" style="margin-top:18px">
+    <h2><span class="n">3</span> Palate — Structure</h2>
+    <p class="sub">Select one level on each scale.</p>
+    <div class="grid" style="margin-top:0">
+      <div>
+        <div class="field"><label>Sweetness</label><div class="segs" data-single="sweetness"></div></div>
+        <div class="field"><label>Acidity</label><div class="segs" data-single="acidity"></div></div>
+        <div class="field"><label>Tannin <span class="hint">reds only</span></label><div class="segs" data-single="tannin"></div></div>
+      </div>
+      <div>
+        <div class="field"><label>Alcohol</label><div class="segs" data-single="alcohol"></div></div>
+        <div class="field"><label>Body</label><div class="segs" data-single="body"></div></div>
+        <div class="field"><label>Finish</label><div class="segs" data-single="finish"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AROMA / FLAVOUR CLUSTERS -->
+  <section class="card" style="margin-top:18px">
+    <h2><span class="n">4</span> Aroma &amp; Flavour Characteristics</h2>
+    <p class="sub">Tap every individual descriptor you detect. Type to search (e.g. "grass", "herb", "oak", "honey").</p>
+    <div class="aromabar">
+      <input id="aromaSearch" type="text" placeholder="🔎 Search descriptors or clusters…" autocomplete="off">
+      <span class="selcount" id="selCount">0 selected</span>
+      <button type="button" class="mini" id="clearAroma">Clear</button>
+    </div>
+    <div id="clusterHost"></div>
+    <p class="noresult" id="noResult" style="display:none">No descriptor matches — try a different word.</p>
+  </section>
+
+  <div class="actions">
+    <button class="btn ghost" id="resetBtn">Reset</button>
+    <button class="btn primary" id="goBtn">🔍 Deduce the Wine</button>
+  </div>
+
+  <div id="out"></div>
+
+  <p class="footnote">
+    SimiWine makes educated deductions from a wine's appearance, structure and aroma. A wine's exact
+    producer or label cannot be known from tasting alone, so any named producers are
+    <em>illustrative examples of a style</em>, not identifications. For fun and learning — please drink responsibly.
+  </p>
+</div>
+
+<script>
+/* ============================================================
+   Tasting scales
+   ============================================================ */
+const SC = {
+  intensity:["pale","medium","deep"],
+  level:["low","medium(-)","medium","medium(+)","high"],      // acidity, tannin, alcohol, nose intensity
+  body:["light","medium(-)","medium","medium(+)","full"],
+  sweetness:["dry","off-dry","medium-dry","medium-sweet","sweet","luscious"],
+  development:["youthful","developing","fully developed","tired"],
+  finish:["short","medium(-)","medium","medium(+)","long"]
+};
+const COLOURS = {
+  White:["lemon-green","lemon","gold","amber","brown"],
+  Rosé:["pink","salmon","orange"],
+  Red:["purple","ruby","garnet","tawny","brown"],
+  Sparkling:["lemon-green","lemon","gold","salmon/pink"],
+  Fortified:["gold","amber","tawny","ruby","brown"]
+};
+/* Glass-colour swatches — a representative hue for each wine colour. */
+const HEX = {
+  "lemon-green":"#DFE3A4","lemon":"#ECDB6E","gold":"#E0B63F","amber":"#CB8329","brown":"#7A4A2A",
+  "pink":"#EC9DB1","salmon":"#EF9C7B","orange":"#E0A05C","salmon/pink":"#F0AEAA",
+  "purple":"#6A1C49","ruby":"#94182F","garnet":"#82302A","tawny":"#A05E30"
+};
+const HUE_NOTE = {
+  "lemon-green":"Straw — Vinho Verde, Muscadet, young Riesling, Moscato",
+  "lemon":"Yellow — Sauvignon Blanc, Sémillon, Albariño, Grüner Veltliner",
+  "gold":"Gold — Chardonnay, Viognier, aged white Rioja, Chenin Blanc",
+  "amber":"Amber — Sherry, Tokaji, Vin Santo, old Tawny Port",
+  "brown":"Brown — aged whites, white Tawny Port, Pedro Ximénez",
+  "pink":"Pink — Mourvèdre & Grenache rosé, Tavel",
+  "salmon":"Salmon — Provence rosé, White Zinfandel, Sangiovese/Syrah rosé",
+  "orange":"Copper — skin-contact / older rosé, Pinot Gris & Pinot Noir rosé",
+  "purple":"Purple — young & thick-skinned: Beaujolais Nouveau, Malbec, Syrah, Pinotage",
+  "ruby":"Ruby — young, fruit-driven: Pinot Noir, Tempranillo, GSM, Merlot, Cabernet",
+  "garnet":"Garnet — developing/aged: Nebbiolo, Sangiovese, Barolo, aged reds",
+  "tawny":"Tawny — mature / barrel-aged: Tawny Port, aged Nebbiolo, Bual Madeira",
+  "salmon/pink":"Pink — rosé sparkling"
+};
+
+/* Aroma & flavour lexicon — EXPANDED so every descriptor is its own button.
+   Each descriptor maps to a scoring cluster key (`key`); the `prefix` is shown as a
+   searchable tag (e.g. "Herbaceous · grass"). oakType marks American/French oak hints. */
+const LEXICON = [
+ {section:"Primary — floral & white fruit", groups:[
+   {key:"floral", prefix:"Floral", items:["acacia","honeysuckle","chamomile","elderflower","blossom","rose","violet","geranium"]},
+   {key:"green_fruit", prefix:"Green fruit", items:["green apple","red apple","gooseberry","pear","pear drop","quince","grape"]},
+   {key:"citrus", prefix:"Citrus", items:["lemon","lime","grapefruit","orange peel"]},
+   {key:"stone_fruit", prefix:"Stone fruit", items:["peach","apricot","nectarine"]},
+   {key:"tropical", prefix:"Tropical", items:["banana","lychee","mango","melon","passion fruit","pineapple","guava"]}
+ ]},
+ {section:"Primary — red, black & dried fruit", groups:[
+   {key:"red_fruit", prefix:"Red fruit", items:["redcurrant","cranberry","raspberry","strawberry","red cherry","red plum"]},
+   {key:"black_fruit", prefix:"Black fruit", items:["blackcurrant","blackberry","bramble","blueberry","black cherry","black plum"]},
+   {key:"dried_fruit", prefix:"Dried/cooked fruit", items:["fig","prune","kirsch","jammy","cooked plum","baked","stewed","preserved fruit"]},
+   {key:"dried_fruit", prefix:"Raisin", items:["raisin","sultana","currant"]}
+ ]},
+ {section:"Primary — herbaceous, herbal & vegetal", groups:[
+   {key:"herbaceous", prefix:"Herbaceous", items:["grass","green bell pepper","asparagus","blackcurrant leaf","tomato leaf","leafy"]},
+   {key:"herbal", prefix:"Herbal", items:["mint","menthol","eucalyptus","fennel","dill","lavender","sage","thyme","garrigue","medicinal"]},
+   {key:"vegetable", prefix:"Vegetal", items:["cabbage","peas","beans","green olive","black olive","beetroot"]}
+ ]},
+ {section:"Primary — spice", groups:[
+   {key:"sweet_spice", prefix:"Sweet spice", items:["cinnamon","clove","ginger","nutmeg","baking spice"]},
+   {key:"pungent_spice", prefix:"Pungent spice", items:["black pepper","white pepper","liquorice","juniper"]}
+ ]},
+ {section:"Secondary — oak", groups:[
+   {key:"oak", prefix:"American oak", oakType:"american", items:["coconut","vanilla","dill","sweet spice","creamy"]},
+   {key:"oak", prefix:"French oak", oakType:"french", items:["cedar","clove","toast","pencil shaving","subtle spice"]},
+   {key:"oak", prefix:"Oak (general)", items:["smoke","charred wood","resinous","mocha","char","tar (oak)"]}
+ ]},
+ {section:"Secondary — ferment, lees & dairy", groups:[
+   {key:"autolytic", prefix:"Autolytic", items:["yeast","biscuit","bread","brioche","pastry","toast (lees)","lees"]},
+   {key:"dairy", prefix:"Dairy / MLF", items:["butter","cream","cheese","yoghurt"]},
+   {key:"kernel", prefix:"Kernel / nutty", items:["almond","marzipan","hazelnut","walnut","coffee","chocolate"]}
+ ]},
+ {section:"Tertiary — bottle / barrel age", groups:[
+   {key:"animal", prefix:"Animal", items:["leather","meaty","farmyard","gamey"]},
+   {key:"maturity", prefix:"Maturity", items:["mushroom","forest floor","wet leaves","hay","tobacco","honey","cereal","marmalade","dried apricot","caramel","toffee","nutty","savoury"]},
+   {key:"mineral", prefix:"Mineral", items:["wet stone","flint","chalk","earth","petrol/kerosene","rubber","tar","steely","wet wool"]}
+ ]}
+];
+/* Build a flat registry: id -> {label, key, prefix, oakType} */
+const DESC = {};
+LEXICON.forEach(sec=>sec.groups.forEach(g=>g.items.forEach(it=>{
+  const id = g.prefix+" · "+it;
+  DESC[id] = {label:it, key:g.key, prefix:g.prefix, oakType:g.oakType||null};
+})));
+
+/* ============================================================
+   Wine reference database (blind-tasting benchmarks)
+   idx ranges 0-based against the relevant scale. body uses SC.body,
+   acidity/tannin/alcohol use SC.level, sweetness uses SC.sweetness,
+   colour-intensity uses SC.intensity.
+   ============================================================ */
+const DB = [
+  // ---- WHITES ----
+  {g:"Sauvignon Blanc",r:"Marlborough, New Zealand",ctry:"New Zealand",cl:"Cool",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[0,2],al:[1,3],sw:[0,1],oak:false,age:"Drink young (1–3 yrs)",
+   ar:["citrus","green_fruit","tropical","herbaceous"],
+   prod:["Cloudy Bay","Greywacke","Dog Point"],q:"good–very good",
+   why:"Pungent grass/gooseberry + passion fruit with searing acidity and no oak."},
+  {g:"Sauvignon Blanc",r:"Sancerre / Loire, France",ctry:"France",cl:"Cool",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,2],al:[1,2],sw:[0,0],oak:false,age:"1–5 yrs",
+   ar:["citrus","green_fruit","herbaceous","mineral"],
+   prod:["Henri Bourgeois","Pascal Jolivet","Vacheron"],q:"very good",
+   why:"Restrained, flinty/mineral Sauvignon — citrus & nettle over wet-stone, high acid."},
+  {g:"Riesling (dry)",r:"Clare/Eden Valley, Australia",ctry:"Australia",cl:"Cool",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[0,1],al:[2,3],sw:[0,0],oak:false,age:"5–15 yrs (develops petrol)",
+   ar:["citrus","floral","mineral","stone_fruit"],
+   prod:["Grosset Polish Hill","Jim Barry","Pewsey Vale"],q:"very good",
+   why:"Bone-dry lime/blossom, steely high acid; ages to toast & petrol/kerosene."},
+  {g:"Riesling (off-dry)",r:"Mosel, Germany",ctry:"Germany",cl:"Cool",type:"White",
+   ci:[0,1],ac:[4,4],tan:[0,0],bd:[0,1],al:[0,1],sw:[1,3],oak:false,age:"5–20 yrs",
+   ar:["citrus","stone_fruit","floral","mineral"],
+   prod:["Dr. Loosen","JJ Prüm","Egon Müller"],q:"very good–outstanding",
+   why:"Low alcohol + off-dry sweetness balanced by piercing acidity; green apple, lime, slate."},
+  {g:"Chardonnay (unoaked)",r:"Chablis, Burgundy",ctry:"France",cl:"Cool",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,2],al:[1,2],sw:[0,0],oak:false,age:"3–10 yrs",
+   ar:["citrus","green_fruit","mineral"],
+   prod:["William Fèvre","Louis Michel","Raveneau"],q:"very good",
+   why:"Lean green-apple/citrus Chardonnay, high acid, wet-stone minerality, little/no oak."},
+  {g:"Chardonnay (oaked)",r:"Côte de Beaune, Burgundy",ctry:"France",cl:"Cool–moderate",type:"White",
+   ci:[1,2],ac:[2,3],tan:[0,0],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"5–15 yrs",
+   ar:["stone_fruit","citrus","oak","dairy","kernel"],
+   prod:["Meursault (Coche-Dury)","Puligny-Montrachet","Leflaive"],q:"outstanding",
+   why:"Stone fruit + struck-match minerality, MLF (butter) and subtle oak (hazelnut, toast)."},
+  {g:"Chardonnay (oaked)",r:"Napa / Sonoma, California",ctry:"USA",cl:"Warm",type:"White",
+   ci:[1,2],ac:[1,2],tan:[0,0],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"3–8 yrs",
+   ar:["tropical","stone_fruit","oak","dairy","kernel"],
+   prod:["Kistler","Rombauer","Far Niente"],q:"good–very good",
+   why:"Ripe tropical/buttery Chardonnay, full body, high alcohol, generous vanilla/coconut oak."},
+  {g:"Pinot Gris / Grigio",r:"Alsace, France",ctry:"France",cl:"Cool",type:"White",
+   ci:[1,2],ac:[1,2],tan:[0,0],bd:[2,3],al:[2,3],sw:[1,2],oak:false,age:"3–8 yrs",
+   ar:["stone_fruit","tropical","floral","sweet_spice"],
+   prod:["Trimbach","Zind-Humbrecht","Hugel"],q:"very good",
+   why:"Rich, slightly off-dry, low-acid white with peach, ginger and a oily texture."},
+  {g:"Gewürztraminer",r:"Alsace, France",ctry:"France",cl:"Cool",type:"White",
+   ci:[1,2],ac:[0,1],tan:[0,0],bd:[3,4],al:[3,4],sw:[1,3],oak:false,age:"3–10 yrs",
+   ar:["floral","tropical","sweet_spice"],
+   prod:["Trimbach","Zind-Humbrecht","Hugel"],q:"very good",
+   why:"Unmistakable lychee + rose + ginger, low acid, full oily body, high alcohol."},
+  {g:"Grüner Veltliner",r:"Kamptal/Wachau, Austria",ctry:"Austria",cl:"Cool",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,2],al:[2,3],sw:[0,0],oak:false,age:"2–8 yrs",
+   ar:["citrus","green_fruit","pungent_spice","vegetable"],
+   prod:["Hirsch","Bründlmayer","FX Pichler"],q:"very good",
+   why:"Citrus & green-apple with signature white-pepper and lentil/vegetal note, high acid."},
+  {g:"Albariño",r:"Rías Baixas, Spain",ctry:"Spain",cl:"Cool maritime",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,2],al:[1,2],sw:[0,0],oak:false,age:"1–4 yrs",
+   ar:["citrus","stone_fruit","floral","mineral"],
+   prod:["Pazo Señorans","Do Ferreiro"],q:"good–very good",
+   why:"Saline citrus/peach white with high acid and a coastal mineral tang."},
+  {g:"Chenin Blanc",r:"Vouvray, Loire",ctry:"France",cl:"Cool",type:"White",
+   ci:[1,2],ac:[3,4],tan:[0,0],bd:[1,3],al:[1,2],sw:[0,3],oak:false,age:"5–20 yrs",
+   ar:["green_fruit","stone_fruit","floral","autolytic"],
+   prod:["Huet","François Chidaine"],q:"very good",
+   why:"High-acid apple/quince with honey and wet-wool; styles from dry to luscious."},
+  {g:"Viognier",r:"Condrieu, N. Rhône",ctry:"France",cl:"Moderate",type:"White",
+   ci:[1,2],ac:[0,1],tan:[0,0],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"2–6 yrs",
+   ar:["stone_fruit","floral","tropical","oak"],
+   prod:["Guigal","Georges Vernay"],q:"very good",
+   why:"Heady apricot + honeysuckle, full oily body, low acid, high alcohol."},
+  {g:"Sémillon",r:"Hunter Valley, Australia",ctry:"Australia",cl:"Warm",type:"White",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[0,1],al:[0,1],sw:[0,0],oak:false,age:"10–20 yrs (toast & honey)",
+   ar:["citrus","green_fruit","autolytic"],
+   prod:["Tyrrell's Vat 1","Brokenwood"],q:"very good",
+   why:"Low-alc, neutral young lemon/grass that ages to toast, honey & lanolin."},
+  // ---- ROSÉ ----
+  {g:"Grenache/Cinsault rosé",r:"Provence, France",ctry:"France",cl:"Warm",type:"Rosé",
+   ci:[0,0],ac:[2,3],tan:[0,1],bd:[1,2],al:[2,3],sw:[0,0],oak:false,age:"Drink young (1–2 yrs)",
+   ar:["red_fruit","citrus","floral","herbal"],
+   prod:["Whispering Angel","Domaine Tempier"],q:"good",
+   why:"Pale onion-skin pink, delicate strawberry/citrus, dry, crisp, herbal garrigue lift."},
+  // ---- SPARKLING ----
+  {g:"Champagne (traditional method)",r:"Champagne, France",ctry:"France",cl:"Cool",type:"Sparkling",
+   ci:[0,1],ac:[3,4],tan:[0,0],bd:[1,2],al:[2,2],sw:[0,1],oak:false,age:"3–15 yrs",
+   ar:["citrus","green_fruit","autolytic","kernel"],
+   prod:["Bollinger","Pol Roger","Charles Heidsieck"],q:"very good–outstanding",
+   why:"High acid, fine persistent mousse, green-apple/citrus with brioche & biscuit autolysis."},
+  {g:"Prosecco (tank method)",r:"Veneto, Italy",ctry:"Italy",cl:"Moderate",type:"Sparkling",
+   ci:[0,1],ac:[2,3],tan:[0,0],bd:[0,1],al:[1,2],sw:[1,2],oak:false,age:"Drink young",
+   ar:["green_fruit","floral","stone_fruit"],
+   prod:["Nino Franco","Bisol"],q:"acceptable–good",
+   why:"Frothy pear/apple & white-blossom, softer mousse, off-dry, no autolytic biscuit."},
+  // ---- REDS ----
+  {g:"Pinot Noir",r:"Burgundy (Côte d'Or)",ctry:"France",cl:"Cool",type:"Red",
+   ci:[0,1],ac:[3,4],tan:[1,2],bd:[1,2],al:[2,3],sw:[0,0],oak:true,age:"5–20 yrs",
+   ar:["red_fruit","floral","maturity","oak","animal"],
+   prod:["Domaine Dujac","Mugnier","Faiveley"],q:"very good–outstanding",
+   why:"Pale ruby, high acid, light-medium silky tannin; red cherry, rose, forest-floor & game with age."},
+  {g:"Pinot Noir",r:"Central Otago / Martinborough, NZ",ctry:"New Zealand",cl:"Cool",type:"Red",
+   ci:[1,2],ac:[3,4],tan:[1,2],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"4–12 yrs",
+   ar:["red_fruit","black_fruit","sweet_spice","oak"],
+   prod:["Felton Road","Ata Rangi"],q:"very good",
+   why:"Riper, deeper Pinot — dark cherry/plum, more body & sweet spice but still high acid."},
+  {g:"Gamay",r:"Beaujolais (Cru), France",ctry:"France",cl:"Cool",type:"Red",
+   ci:[0,1],ac:[3,4],tan:[1,2],bd:[1,2],al:[1,2],sw:[0,0],oak:false,age:"2–10 yrs",
+   ar:["red_fruit","floral","pungent_spice"],
+   prod:["Marcel Lapierre","Jean Foillard"],q:"good–very good",
+   why:"Bright juicy red cherry/banana (carbonic), high acid, low-medium soft tannin."},
+  {g:"Cabernet Sauvignon",r:"Médoc / Bordeaux (Left Bank)",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"10–30 yrs",
+   ar:["black_fruit","herbaceous","oak","sweet_spice","maturity"],
+   prod:["Ch. Margaux","Ch. Léoville Barton","Ch. Pichon Baron"],q:"outstanding",
+   why:"Deep, high tannin/acid; blackcurrant, cedar/pencil-shaving oak, green-leaf edge, cigar-box age."},
+  {g:"Cabernet Sauvignon",r:"Napa Valley, California",ctry:"USA",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[1,2],tan:[3,4],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"8–25 yrs",
+   ar:["black_fruit","dried_fruit","oak","sweet_spice","kernel"],
+   prod:["Ridge","Caymus","Opus One"],q:"very good–outstanding",
+   why:"Opaque, ripe cassis/blackberry jam, full body, high alcohol, lush vanilla/mocha oak, ripe tannin."},
+  {g:"Cabernet Sauvignon",r:"Coonawarra, Australia",ctry:"Australia",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"8–20 yrs",
+   ar:["black_fruit","herbal","oak"],
+   prod:["Wynns","Penfolds Bin 707"],q:"very good",
+   why:"Cassis with a signature eucalyptus/mint lift, firm tannin, cedar oak."},
+  {g:"Merlot (Right Bank blend)",r:"Pomerol / St-Émilion, Bordeaux",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[2,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"8–25 yrs",
+   ar:["red_fruit","black_fruit","oak","maturity"],
+   prod:["Ch. Pétrus","Ch. Cheval Blanc","Ch. Canon"],q:"outstanding",
+   why:"Plush plum/black-cherry, softer rounder tannin than Cab, fruitcake & truffle with age."},
+  {g:"Syrah",r:"Northern Rhône (Hermitage/Côte-Rôtie)",ctry:"France",cl:"Moderate",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"10–25 yrs",
+   ar:["black_fruit","pungent_spice","animal","oak","floral"],
+   prod:["Guigal","Jean-Louis Chave","Clape"],q:"outstanding",
+   why:"Deep, savoury black fruit with black pepper, smoked meat, violet & leather; firm tannin."},
+  {g:"Shiraz",r:"Barossa Valley, Australia",ctry:"Australia",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[1,2],tan:[2,3],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"8–20 yrs",
+   ar:["black_fruit","dried_fruit","sweet_spice","oak"],
+   prod:["Penfolds Grange","Henschke Hill of Grace","Torbreck"],q:"very good–outstanding",
+   why:"Opaque, jammy blackberry/plum, full body, high alcohol, sweet vanilla/chocolate oak, soft ripe tannin."},
+  {g:"Grenache (GSM blend)",r:"Châteauneuf-du-Pape, S. Rhône",ctry:"France",cl:"Warm",type:"Red",
+   ci:[1,2],ac:[1,2],tan:[2,3],bd:[3,4],al:[3,4],sw:[0,0],oak:false,age:"6–20 yrs",
+   ar:["red_fruit","dried_fruit","herbal","pungent_spice"],
+   prod:["Ch. de Beaucastel","Vieux Télégraphe"],q:"very good–outstanding",
+   why:"Warm strawberry/fig with garrigue herbs & pepper, high alcohol, medium tannin, low-med acid."},
+  {g:"Tempranillo",r:"Rioja, Spain",ctry:"Spain",cl:"Moderate",type:"Red",
+   ci:[1,2],ac:[2,3],tan:[2,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"5–20 yrs",
+   ar:["red_fruit","dried_fruit","oak","dairy","maturity"],
+   prod:["La Rioja Alta","López de Heredia","Muga"],q:"very good",
+   why:"Red plum/leather with signature American-oak coconut/vanilla & dill; savoury, mature."},
+  {g:"Tempranillo",r:"Ribera del Duero, Spain",ctry:"Spain",cl:"Continental",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[3,4],al:[3,4],sw:[0,0],oak:true,age:"8–25 yrs",
+   ar:["black_fruit","oak","sweet_spice"],
+   prod:["Vega Sicilia","Pingus","Aalto"],q:"outstanding",
+   why:"Darker, denser, higher-tannin Tempranillo — black fruit, structured, powerful."},
+  {g:"Sangiovese",r:"Chianti Classico / Tuscany",ctry:"Italy",cl:"Moderate",type:"Red",
+   ci:[1,2],ac:[3,4],tan:[3,3],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"5–20 yrs",
+   ar:["red_fruit","herbal","dried_fruit","oak","maturity"],
+   prod:["Fontodi","Felsina","Biondi-Santi (Brunello)"],q:"very good–outstanding",
+   why:"High acid + grippy tannin, sour red cherry, dried herb, tomato-leaf, leather & balsamic."},
+  {g:"Nebbiolo",r:"Barolo / Barbaresco, Piedmont",ctry:"Italy",cl:"Moderate",type:"Red",
+   ci:[0,1],ac:[3,4],tan:[4,4],bd:[2,3],al:[2,3],sw:[0,0],oak:true,age:"10–30 yrs",
+   ar:["red_fruit","floral","maturity","herbal"],
+   prod:["Giacomo Conterno","Bartolo Mascarello","Gaja"],q:"outstanding",
+   why:"Pale garnet yet ferociously tannic & high-acid; rose, tar, red cherry, truffle & dried herb."},
+  {g:"Malbec",r:"Mendoza, Argentina",ctry:"Argentina",cl:"Warm (high-altitude)",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[2,3],bd:[3,4],al:[3,4],sw:[0,1],oak:true,age:"5–15 yrs",
+   ar:["black_fruit","floral","sweet_spice","oak"],
+   prod:["Catena Zapata","Achával-Ferrer"],q:"very good",
+   why:"Inky violet-tinged blackberry/plum, full body, velvety medium-high tannin, mocha oak."},
+  {g:"Zinfandel",r:"California (Lodi / Sonoma)",ctry:"USA",cl:"Warm",type:"Red",
+   ci:[1,2],ac:[1,2],tan:[2,3],bd:[3,4],al:[4,4],sw:[0,1],oak:true,age:"3–10 yrs",
+   ar:["red_fruit","dried_fruit","sweet_spice","oak"],
+   prod:["Ridge Lytton Springs","Seghesio"],q:"good–very good",
+   why:"Jammy bramble/raisin, very high alcohol, brambly sweet spice, soft tannin."},
+  {g:"Cabernet Franc",r:"Chinon / Bourgueil, Loire",ctry:"France",cl:"Cool",type:"Red",
+   ci:[1,2],ac:[3,4],tan:[2,3],bd:[1,2],al:[1,2],sw:[0,0],oak:false,age:"4–12 yrs",
+   ar:["red_fruit","herbaceous","floral","pungent_spice"],
+   prod:["Olga Raffault","Bernard Baudry"],q:"good–very good",
+   why:"Medium ruby, leafy/graphite + raspberry, high acid, grainy medium tannin, pencil-shaving."},
+  {g:"Touriga Nacional (dry blend)",r:"Douro, Portugal",ctry:"Portugal",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[3,4],al:[3,4],sw:[0,0],oak:true,age:"6–20 yrs",
+   ar:["black_fruit","floral","sweet_spice","oak"],
+   prod:["Quinta do Crasto","Niepoort"],q:"very good",
+   why:"Dense violet/blueberry, full body, firm tannin, floral & schist mineral edge."},
+  {g:"Pinotage",r:"Stellenbosch, South Africa",ctry:"South Africa",cl:"Warm",type:"Red",
+   ci:[2,2],ac:[2,3],tan:[2,3],bd:[2,3],al:[3,4],sw:[0,0],oak:true,age:"4–12 yrs",
+   ar:["red_fruit","black_fruit","oak","kernel"],
+   prod:["Kanonkop","Beyerskloof"],q:"good–very good",
+   why:"Deep, smoky/tarry plum & banana with a roasted-coffee oak signature."},
+  // ---- FORTIFIED ----
+  {g:"Port (Ruby/LBV)",r:"Douro, Portugal",ctry:"Portugal",cl:"Warm",type:"Fortified",
+   ci:[2,2],ac:[2,3],tan:[3,4],bd:[3,4],al:[4,4],sw:[3,5],oak:false,age:"Drink on release / 10+ yrs",
+   ar:["black_fruit","dried_fruit","sweet_spice"],
+   prod:["Graham's","Taylor's","Fonseca"],q:"very good",
+   why:"Sweet, opaque, very high alcohol (fortified), blackberry/fig, firm tannin."},
+  {g:"Sherry (Fino/Manzanilla)",r:"Jerez, Spain",ctry:"Spain",cl:"Warm maritime",type:"Fortified",
+   ci:[0,1],ac:[2,3],tan:[0,0],bd:[1,2],al:[3,4],sw:[0,0],oak:false,age:"Drink fresh",
+   ar:["kernel","autolytic","herbal","mineral"],
+   prod:["Tio Pepe","Hidalgo La Gitana"],q:"very good",
+   why:"Bone-dry, pale, saline & yeasty (flor) with almond and a tangy bite; high alcohol."},
+  {g:"Sherry (Oloroso)",r:"Jerez, Spain",ctry:"Spain",cl:"Warm maritime",type:"Fortified",
+   ci:[2,2],ac:[2,3],tan:[0,0],bd:[3,4],al:[4,4],sw:[0,2],oak:false,age:"Very long-lived",
+   ar:["kernel","dried_fruit","maturity"],
+   prod:["Lustau","González Byass"],q:"very good",
+   why:"Deep amber, oxidative walnut/toffee, dried fig, full body, very high alcohol."}
+];
+/* Typical glass colour(s) per wine — keyed by grape|region (used in scoring + display) */
+const COL = {
+  "Sauvignon Blanc|Marlborough, New Zealand":["lemon-green","lemon"],
+  "Sauvignon Blanc|Sancerre / Loire, France":["lemon-green","lemon"],
+  "Riesling (dry)|Clare/Eden Valley, Australia":["lemon","lemon-green","gold"],
+  "Riesling (off-dry)|Mosel, Germany":["lemon-green","lemon"],
+  "Chardonnay (unoaked)|Chablis, Burgundy":["lemon-green","lemon"],
+  "Chardonnay (oaked)|Côte de Beaune, Burgundy":["lemon","gold"],
+  "Chardonnay (oaked)|Napa / Sonoma, California":["gold","lemon"],
+  "Pinot Gris / Grigio|Alsace, France":["lemon","gold"],
+  "Gewürztraminer|Alsace, France":["gold","lemon"],
+  "Grüner Veltliner|Kamptal/Wachau, Austria":["lemon-green","lemon"],
+  "Albariño|Rías Baixas, Spain":["lemon-green","lemon"],
+  "Chenin Blanc|Vouvray, Loire":["lemon","gold"],
+  "Viognier|Condrieu, N. Rhône":["gold","lemon"],
+  "Sémillon|Hunter Valley, Australia":["lemon-green","lemon","gold"],
+  "Grenache/Cinsault rosé|Provence, France":["pink","salmon"],
+  "Champagne (traditional method)|Champagne, France":["lemon","gold"],
+  "Prosecco (tank method)|Veneto, Italy":["lemon-green","lemon"],
+  "Pinot Noir|Burgundy (Côte d'Or)":["ruby","garnet"],
+  "Pinot Noir|Central Otago / Martinborough, NZ":["ruby","purple"],
+  "Gamay|Beaujolais (Cru), France":["purple","ruby"],
+  "Cabernet Sauvignon|Médoc / Bordeaux (Left Bank)":["ruby","garnet"],
+  "Cabernet Sauvignon|Napa Valley, California":["purple","ruby"],
+  "Cabernet Sauvignon|Coonawarra, Australia":["ruby","garnet"],
+  "Merlot (Right Bank blend)|Pomerol / St-Émilion, Bordeaux":["ruby","garnet"],
+  "Syrah|Northern Rhône (Hermitage/Côte-Rôtie)":["purple","ruby"],
+  "Shiraz|Barossa Valley, Australia":["purple","ruby"],
+  "Grenache (GSM blend)|Châteauneuf-du-Pape, S. Rhône":["ruby","garnet"],
+  "Tempranillo|Rioja, Spain":["ruby","garnet"],
+  "Tempranillo|Ribera del Duero, Spain":["purple","ruby"],
+  "Sangiovese|Chianti Classico / Tuscany":["ruby","garnet"],
+  "Nebbiolo|Barolo / Barbaresco, Piedmont":["garnet","tawny"],
+  "Malbec|Mendoza, Argentina":["purple","ruby"],
+  "Zinfandel|California (Lodi / Sonoma)":["ruby","purple"],
+  "Cabernet Franc|Chinon / Bourgueil, Loire":["ruby","purple"],
+  "Touriga Nacional (dry blend)|Douro, Portugal":["purple","ruby"],
+  "Pinotage|Stellenbosch, South Africa":["ruby","purple"],
+  "Port (Ruby/LBV)|Douro, Portugal":["ruby","purple"],
+  "Sherry (Fino/Manzanilla)|Jerez, Spain":["gold"],
+  "Sherry (Oloroso)|Jerez, Spain":["amber","tawny","brown"]
+};
+DB.forEach(w=>{ w.col = COL[w.g+"|"+w.r] || []; });
+
+/* ============================================================
+   State + UI build
+   ============================================================ */
+const state={type:null,intensity:null,colour:null,nintensity:null,development:null,
+  sweetness:null,acidity:null,tannin:null,alcohol:null,body:null,finish:null,clusters:new Set()};
+
+function seg(text){const d=document.createElement('div');d.className='seg';d.textContent=text;d.dataset.val=text;return d;}
+function buildSegs(sel,key,arr){
+  const host=document.querySelector(`.segs[data-single="${key}"]`);
+  if(!host)return; host.innerHTML='';
+  arr.forEach(v=>{const s=seg(v);s.onclick=()=>{
+    state[key]= state[key]===v? null : v;
+    host.querySelectorAll('.seg').forEach(x=>x.classList.toggle('on',x.dataset.val===state[key]));
+    if(key==='type')refreshColour();
+  };host.appendChild(s);});
+}
+const TYPES=["Red","White","Rosé","Sparkling","Fortified"];
+buildSegs('type','type',TYPES);
+buildSegs('nintensity','nintensity',SC.level);
+buildSegs('development','development',SC.development);
+buildSegs('sweetness','sweetness',SC.sweetness);
+buildSegs('acidity','acidity',SC.level);
+buildSegs('tannin','tannin',SC.level);
+buildSegs('alcohol','alcohol',SC.level);
+buildSegs('body','body',SC.body);
+buildSegs('finish','finish',SC.finish);
+
+// derive a real shade for a hue at a given depth (pale = lighter, deep = darker)
+function hexToRgb(h){h=h.replace('#','');return{r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};}
+function toHex(n){return Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0');}
+function shade(hex,depth){
+  const {r,g,b}=hexToRgb(hex);
+  if(depth==='medium') return hex;
+  if(depth==='pale'){ const m=(c)=>c+(255-c)*0.52; return '#'+toHex(m(r))+toHex(m(g))+toHex(m(b)); }
+  // deep: darken toward black
+  return '#'+toHex(r*0.74)+toHex(g*0.74)+toHex(b*0.74);
+}
+const DEPTHS=["pale","medium","deep"];
+function refreshColour(){
+  const f=document.getElementById('colourField');
+  const note=document.getElementById('hueNote');
+  if(!state.type){f.classList.remove('show');return;}
+  f.classList.add('show');
+  state.colour=null; state.intensity=null;
+  const grid=document.getElementById('hueGrid'); grid.innerHTML='';
+  note.textContent='Tap the shade that matches your glass.';
+  // header row
+  const head=document.createElement('div');head.className='hg-head';
+  head.innerHTML='<span>Hue</span><span>Pale</span><span>Medium</span><span>Deep</span>';
+  grid.appendChild(head);
+  (COLOURS[state.type]||[]).forEach(hue=>{
+    const row=document.createElement('div');row.className='hg-row';
+    const lab=document.createElement('span');lab.className='hg-label';lab.textContent=hue;row.appendChild(lab);
+    DEPTHS.forEach(depth=>{
+      const cell=document.createElement('div');cell.className='cell';
+      cell.innerHTML=`<div class="disc" style="background:${shade(HEX[hue]||'#ccc',depth)}"></div>`;
+      cell.onmouseenter=()=>{ note.innerHTML=`<b>${depth} ${hue}</b> — ${esc((HUE_NOTE[hue]||'').replace(/^[^—]*—\s*/,''))}`; };
+      cell.onclick=()=>{
+        const already = state.colour===hue && state.intensity===depth;
+        grid.querySelectorAll('.cell').forEach(c=>c.classList.remove('on'));
+        if(already){ state.colour=null; state.intensity=null; note.textContent='Tap the shade that matches your glass.'; }
+        else{ state.colour=hue; state.intensity=depth; cell.classList.add('on');
+          note.innerHTML=`Selected: <b>${depth} ${hue}</b> — ${esc((HUE_NOTE[hue]||'').replace(/^[^—]*—\s*/,''))}`; }
+      };
+      row.appendChild(cell);
+    });
+    grid.appendChild(row);
+  });
+}
+
+// aroma lexicon — one button per descriptor, grouped under its cluster prefix
+const host=document.getElementById('clusterHost');
+const selCountEl=document.getElementById('selCount');
+function updateSelCount(){ selCountEl.textContent = state.clusters.size+' selected'; }
+LEXICON.forEach(sec=>{
+  const secEl=document.createElement('div');secEl.className='lexsection';
+  secEl.innerHTML=`<p class="sl">${sec.section}</p>`;
+  sec.groups.forEach(g=>{
+    const gw=document.createElement('div');gw.className='lexgroup';
+    gw.innerHTML=`<p class="gp">${g.prefix}</p>`;
+    const row=document.createElement('div');row.className='chips';
+    g.items.forEach(it=>{
+      const id=g.prefix+" · "+it;
+      const c=document.createElement('div');c.className='chip';c.dataset.id=id;
+      c.dataset.search=(g.prefix+' '+it+' '+g.key).toLowerCase();
+      c.innerHTML=`<span class="ptag">${g.prefix}</span>${it}`;
+      c.onclick=()=>{ c.classList.toggle('on');
+        c.classList.contains('on')?state.clusters.add(id):state.clusters.delete(id);
+        updateSelCount(); };
+      row.appendChild(c);
+    });
+    gw.appendChild(row);secEl.appendChild(gw);
+  });
+  host.appendChild(secEl);
+});
+// live search filter (matches descriptor, cluster prefix or scoring key)
+const searchEl=document.getElementById('aromaSearch');
+searchEl.oninput=()=>{
+  const q=searchEl.value.trim().toLowerCase(); let any=false;
+  host.querySelectorAll('.chip').forEach(c=>{
+    const show=!q||c.dataset.search.includes(q);
+    c.style.display=show?'':'none'; if(show)any=true;
+  });
+  host.querySelectorAll('.lexgroup').forEach(g=>{
+    g.style.display=[...g.querySelectorAll('.chip')].some(c=>c.style.display!=='none')?'':'none'; });
+  host.querySelectorAll('.lexsection').forEach(s=>{
+    s.style.display=[...s.querySelectorAll('.chip')].some(c=>c.style.display!=='none')?'':'none'; });
+  document.getElementById('noResult').style.display=any?'none':'';
+};
+document.getElementById('clearAroma').onclick=()=>{
+  state.clusters.clear();
+  host.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));
+  updateSelCount();
+};
+
+/* ============================================================
+   Offline rule-based engine (fallback / standalone)
+   ============================================================ */
+function idxOf(arr,v){return arr.indexOf(v);}
+function rangePenalty(val,range){ // val index vs [min,max]
+  if(val==null)return 0; // unknown → no penalty
+  if(val<range[0])return range[0]-val;
+  if(val>range[1])return val-range[1];
+  return 0;
+}
+// colour hue match with age-adjacency partial credit (1 exact, .5 one step, 0 else)
+function hueScore(w){
+  if(!state.colour) return null;            // hue unknown → ignore
+  const order = COLOURS[w.type]||[];
+  const si = order.indexOf(state.colour);
+  if(si<0) return 0;                        // user's hue invalid for this wine's type
+  if(!w.col || !w.col.length) return 0.5;
+  let best=99;
+  w.col.forEach(h=>{ const i=order.indexOf(h); if(i>=0) best=Math.min(best,Math.abs(i-si)); });
+  return best===0?1 : best===1?0.5 : 0;
+}
+function scoreOffline(){
+  const inAc=idxOf(SC.level,state.acidity), inTan=idxOf(SC.level,state.tannin),
+    inAl=idxOf(SC.level,state.alcohol), inBd=idxOf(SC.body,state.body),
+    inSw=idxOf(SC.sweetness,state.sweetness), inCi=idxOf(SC.intensity,state.intensity);
+  const ac=state.acidity?inAc:null, tan=state.tannin?inTan:null, al=state.alcohol?inAl:null,
+    bd=state.body?inBd:null, sw=state.sweetness?inSw:null, ci=state.intensity?inCi:null;
+  const norm=[...new Set([...state.clusters].map(id=>(DESC[id]&&DESC[id].key)||id))];
+  const wantsOakSel = norm.includes('oak') || norm.includes('dairy') || norm.includes('kernel');
+  const americanOakSel = [...state.clusters].some(id=>DESC[id]&&DESC[id].oakType==='american');
+  const results=DB.map(w=>{
+    let pen=0, max=0;
+    // hard-ish type filter
+    let typeMiss=0;
+    if(state.type && w.type!==state.type) typeMiss=6;
+    // ---- STRUCTURE (acidity/tannin/alcohol/body/sweetness) ----
+    const struct=[[ac,w.ac,1.4],[tan,w.tan,1.5],[al,w.al,1],[bd,w.bd,1.2],[sw,w.sw,1.3]];
+    struct.forEach(([v,rng,wt])=>{ if(v!=null){ max+=wt*4; pen+=wt*rangePenalty(v,rng);} });
+    const structScore = max>0 ? Math.max(0,(max-pen)/max) : 0.5;
+    // ---- COLOUR (intensity + hue, with age-adjacency partial credit) ----
+    let cMax=0,cGot=0;
+    if(ci!=null){ cMax+=1; cGot+= Math.max(0, 1 - rangePenalty(ci,w.ci)/2); }
+    const hs=hueScore(w);
+    if(hs!=null){ cMax+=1.7; cGot+= 1.7*hs; }
+    const colourPart = cMax>0 ? cGot/cMax : 0.5;
+    // ---- AROMA / FLAVOUR ---- (alias-normalised, deduped)
+    let aromaScore=0, aromaMax=0;
+    if(norm.length){
+      aromaMax=norm.length*2;
+      norm.forEach(k=>{ aromaScore += w.ar.includes(k)?2:-0.4; });
+    }
+    const aromaPart = aromaMax>0 ? Math.max(0,(aromaScore+aromaMax)/(2*aromaMax)) : 0.5;
+    // oak inference
+    const oakPen = (wantsOakSel && !w.oak)?1.5 : (!wantsOakSel && w.oak && norm.length>2)?0.4 : 0;
+    // American-oak hint nudges American-oak-driven wines (Rioja, Napa, Barossa, US Zin)
+    const amOak = /Rioja|California|Napa|Barossa|Lodi|Sonoma|Coonawarra|Mendoza/.test(w.r);
+    const amBonus = (americanOakSel && amOak && w.oak)?0.04 : 0;
+    // ---- BLEND: structure 42% / colour 28% / aroma 30% ----
+    let conf = structScore*0.42 + colourPart*0.28 + aromaPart*0.30;
+    conf -= typeMiss*0.13;
+    conf -= oakPen*0.05;
+    conf += amBonus;
+    conf = Math.max(0.02,Math.min(0.99,conf));
+    return {...w,conf};
+  });
+  results.sort((a,b)=>b.conf-a.conf);
+  // normalise top so the leader looks decisive but honest
+  return results.slice(0,4);
+}
+
+/* ============================================================
+   AI engine via Cowork (askClaude) with offline fallback
+   ============================================================ */
+function profileText(){
+  const sel=[...state.clusters].map(id=>DESC[id]?`${DESC[id].label} (${DESC[id].prefix})`:id).join(', ');
+  const L=[];
+  L.push(`Wine type: ${state.type||'—'}`);
+  L.push(`Appearance: intensity ${state.intensity||'—'}, colour ${state.colour||'—'}`);
+  L.push(`Nose: aroma intensity ${state.nintensity||'—'}, development ${state.development||'—'}`);
+  L.push(`Palate: sweetness ${state.sweetness||'—'}, acidity ${state.acidity||'—'}, tannin ${state.tannin||'—'}, alcohol ${state.alcohol||'—'}, body ${state.body||'—'}, finish ${state.finish||'—'}`);
+  L.push(`Aroma/flavour clusters: ${sel||'—'}`);
+  return L.join('\n');
+}
+
+const hasAI = !!(window.cowork && typeof window.cowork.askClaude==='function');
+
+async function deduceAI(){
+  const prompt=`You are an expert blind taster running a blind tasting deduction.
+Given this systematic tasting note, deduce the most likely wines. Reply with STRICT JSON only, no prose, shape:
+{"matches":[{"grape":"","region":"specific appellation/region","country":"","climate":"","hue":"one of: lemon-green, lemon, gold, amber, brown, pink, salmon, orange, purple, ruby, garnet, tawny","style":"","ageRange":"","confidence":0-100,"producers":["",""],"reasoning":"one sentence tied to the note"}],"conclusion":{"quality":"","readiness":"","ageing":""},"headline":"a short witty one-line verdict"}
+Give 3 matches, best first. Be specific about region/appellation AND country (e.g. region "Marlborough", country "New Zealand"). "hue" must be the single colour term that best fits the wine. Producers are illustrative benchmarks only.
+TASTING NOTE:
+${profileText()}`;
+  const raw= await window.cowork.askClaude(prompt,[]);
+  let txt = typeof raw==='string'?raw:(raw&&raw.text)||JSON.stringify(raw);
+  const m=txt.match(/\{[\s\S]*\}/); if(!m)throw new Error('no json');
+  const data=JSON.parse(m[0]);
+  return data;
+}
+
+function offlineToData(){
+  const top=scoreOffline();
+  return {
+    headline: top[0]? `My deduction: a ${top[0].g} — most likely ${top[0].r.split(',')[0]}.` : 'Inconclusive — add more observations.',
+    matches: top.map(w=>({grape:w.g,region:w.r,country:w.ctry,climate:w.cl,style:(w.oak?'Oaked':'Unoaked')+' · '+w.type,
+      hue:(w.col&&w.col[0])||null,
+      ageRange:w.age,confidence:Math.round(w.conf*100),producers:w.prod,reasoning:w.why})),
+    conclusion: (()=>{const w=top[0];if(!w)return{quality:'—',readiness:'—',ageing:'—'};
+      return {quality:`Typically ${w.q}.`,
+        readiness: w.age.toLowerCase().includes('young')||w.age.toLowerCase().includes('fresh')?'Best enjoyed now, while fresh.':'Drinking well; structure supports cellaring.',
+        ageing:w.age};})()
+  };
+}
+
+/* ============================================================
+   Render
+   ============================================================ */
+function render(data,engine){
+  const out=document.getElementById('out');
+  const matches=data.matches||[];
+  if(!matches.length){out.innerHTML='<div class="verdict"><div class="vbody empty">No confident match. Add a few more observations and try again.</div></div>';return;}
+  let html=`<div class="verdict"><div class="vhead">
+     <div class="kicker">SimiWine deduces — ${engine}</div>
+     <h3>${esc(data.headline||matches[0].grape)}</h3>
+     <div class="vsub">${matches.length} candidate${matches.length>1?'s':''}, most likely first.</div>
+   </div><div class="vbody">`;
+  matches.forEach((m,i)=>{
+    const c=Math.max(2,Math.min(99,Math.round(m.confidence||0)));
+    const hex = m.hue && HEX[m.hue] ? HEX[m.hue] : null;
+    html+=`<div class="match ${i===0?'lead':''}">
+      <div class="mtop">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${hex?`<span class="swatch-out"><span class="disc" style="background:${hex}" title="${esc(m.hue)}"></span></span>`:''}
+          <div><span class="gname">${esc(m.grape)}</span><br><span class="gregion">${esc(m.region||'')}${m.country?' · '+esc(m.country):''}</span></div>
+        </div>
+        <div class="conf"><div class="bar"><i style="width:${c}%"></i></div><div class="lab">${c}% confidence</div></div>
+      </div>
+      <div class="meta">
+        ${m.region?`<span class="pill"><b>Region</b> ${esc(m.region)}</span>`:''}
+        ${m.country?`<span class="pill"><b>Country</b> ${esc(m.country)}</span>`:''}
+        ${m.hue?`<span class="pill"><b>Colour</b> ${esc(m.hue)}</span>`:''}
+        ${m.climate?`<span class="pill"><b>Climate</b> ${esc(m.climate)}</span>`:''}
+        ${m.style?`<span class="pill"><b>Style</b> ${esc(m.style)}</span>`:''}
+        ${m.ageRange?`<span class="pill"><b>Age/drink</b> ${esc(m.ageRange)}</span>`:''}
+      </div>
+      ${m.reasoning?`<p class="reason">🔎 ${esc(m.reasoning)}</p>`:''}
+      ${m.producers&&m.producers.length?`<p class="prod"><b>Benchmark producers:</b> ${m.producers.map(esc).join(' · ')}</p>`:''}
+    </div>`;
+  });
+  if(data.conclusion){const cc=data.conclusion;
+    html+=`<div class="concl">
+      <div class="cc"><div class="t">Quality</div><div class="v">${esc(cc.quality||'—')}</div></div>
+      <div class="cc"><div class="t">Readiness</div><div class="v">${esc(cc.readiness||'—')}</div></div>
+      <div class="cc"><div class="t">Ageing potential</div><div class="v">${esc(cc.ageing||'—')}</div></div>
+    </div>`;}
+  html+=`</div></div>`;
+  out.innerHTML=html;
+  out.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ============================================================
+   Wiring
+   ============================================================ */
+function setEngineBadge(){
+  const dot=document.getElementById('engineDot'),t=document.getElementById('engineText');
+  if(hasAI){dot.classList.add('on');t.textContent='AI engine ready (Cowork)';}
+  else{t.textContent='Offline expert engine (built-in database)';}
+}
+setEngineBadge();
+
+const go=document.getElementById('goBtn');
+go.onclick=async()=>{
+  const filled=Object.entries(state).filter(([k,v])=> k==='clusters'?v.size:v).length;
+  if(filled<3){ document.getElementById('out').innerHTML='<div class="verdict"><div class="vbody empty">Give me a little more to work with — pick at least the wine type, acidity, body and a few aromas.</div></div>'; return; }
+  go.disabled=true; const label=go.innerHTML; go.innerHTML='<span class="spin"></span>Deducing…';
+  try{
+    if(hasAI){
+      try{ const d=await deduceAI(); render(d,'AI engine'); }
+      catch(e){ render(offlineToData(),'offline engine'); }
+    }else{
+      render(offlineToData(),'offline engine');
+    }
+  }finally{ go.disabled=false; go.innerHTML=label; }
+};
+
+document.getElementById('resetBtn').onclick=()=>{
+  Object.keys(state).forEach(k=>{ state[k]= k==='clusters'? new Set() : null; });
+  document.querySelectorAll('.seg.on,.chip.on,.cell.on').forEach(e=>e.classList.remove('on'));
+  document.getElementById('colourField').classList.remove('show');
+  document.getElementById('out').innerHTML='';
+  const sb=document.getElementById('aromaSearch'); if(sb){sb.value='';sb.dispatchEvent(new Event('input'));}
+  updateSelCount();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+</script>
+</body>
+</html>
