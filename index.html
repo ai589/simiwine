@@ -140,14 +140,24 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
 .pair span{background:var(--chip);border-radius:8px;padding:4px 9px}
 .toolrow{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:8px;flex-wrap:wrap}
 .toolrow label{font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
-.contact{max-width:460px;margin:8px auto 2px;text-align:center}
-.contact summary{cursor:pointer;font-size:12.5px;color:var(--wine);font-weight:700;list-style:none}
+.contact{max-width:460px;margin:16px auto 6px;text-align:center}
+.contact summary{cursor:pointer;font-size:15px;color:var(--wine);font-weight:700;list-style:none;display:inline-block;padding:12px 26px;border:2px solid var(--wine);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
+.contact summary:hover{background:#fff5f7}
 .contact summary::-webkit-details-marker{display:none}
 .cform{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px}
 .cform input,.cform textarea{border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;font-family:inherit;background:#fff;color:var(--ink)}
 .cform textarea{resize:vertical}
 .cform input:focus,.cform textarea:focus{outline:none;border-color:var(--wine2);box-shadow:0 0 0 3px rgba(176,43,86,.12)}
 .cform button{align-self:center}
+.feedback{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;text-align:center}
+.fbq{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.fbpick{margin-top:10px;border:1px solid var(--gold);background:#fff;color:var(--wine);border-radius:9px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.fbpick:hover{background:#fffaf2}
+.fbpick:disabled{opacity:.6;cursor:default}
+.fbnone{border:2px solid var(--gold);background:#fffaf2;color:var(--wine);border-radius:11px;padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px}
+.fbnone:hover{background:#fff3e0;border-color:var(--wine)}
+.fbnone:disabled{opacity:.6;cursor:default}
+.fbResult{font-size:12.5px;color:var(--good);font-weight:700;margin:10px 0 0;min-height:16px}
 @media print{.actions,.toolrow,.hero-art,.aromabar,.engine-badge,#kofi-btn{display:none!important}body{background:#fff}.card,.verdict{box-shadow:none;border-color:#ccc}}
 .concl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px}
 @media(max-width:680px){.concl{grid-template-columns:1fr}}
@@ -304,7 +314,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
     <label><input type="checkbox" id="studyToggle"> Study mode — show reasoning &amp; confidence breakdown</label>
     <button class="btn ghost" id="printBtn" style="padding:8px 16px;font-size:13px">🖨 Print tasting sheet</button>
   </div>
-  <p style="text-align:center;font-size:12px;color:var(--muted);margin:8px 0 0">🍷 <span id="useCount">…</span> wines deduced with SimiWine</p>
+  <p style="text-align:center;font-size:12px;color:var(--muted);margin:8px 0 0">🍷 <span id="useCount">…</span> wines deduced · <span id="myRecord"></span></p>
 
   <div id="out"></div>
 
@@ -320,7 +330,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
     <br><br>
     ☕ <strong>Enjoyed SimiWine? Donations are warmly welcomed</strong> — they help keep it free and growing.
     <br><br>
-    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.29-0037 (SGT)</span>
+    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.29-0112 (SGT)</span>
   </p>
   <div class="contact">
     <details>
@@ -337,15 +347,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
       </form>
     </details>
   </div>
-  <div id="kofi-btn" style="text-align:center;margin:-6px 0 12px"><a href="https://ko-fi.com/X3P72280D0" target="_blank" rel="noopener" style="display:inline-block;background:var(--wine);color:#fff;text-decoration:none;font-weight:700;font-size:13.5px;padding:10px 18px;border-radius:10px;box-shadow:var(--shadow)">☕ Support SimiWine on Ko-fi</a></div>
-  <script src="https://storage.ko-fi.com/cdn/widget/Widget_2.js"></script>
-  <script>
-    try{
-      kofiwidget2.init('Support SimiWine on Ko-fi', '#b02b56', 'X3P72280D0');
-      var _k=document.getElementById('kofi-btn');
-      if(_k && typeof kofiwidget2.getHTML==='function'){ _k.innerHTML=kofiwidget2.getHTML(); }
-    }catch(e){}
-  </script>
+  <div id="kofi-btn" style="text-align:center;margin:6px 0 16px"><a href="https://ko-fi.com/X3P72280D0" target="_blank" rel="noopener" style="display:inline-block;background:var(--wine);color:#fff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 30px;border-radius:12px;box-shadow:var(--shadow)">☕ Support SimiWine on Ko-fi</a></div>
 </div>
 
 <script>
@@ -1578,10 +1580,13 @@ function render(data,engine){
       ${(window.__study && m.whyNot)?`<p class="whynot">↳ ${esc(m.whyNot)}</p>`:''}
       ${(window.__study && m.breakdown)?`<div class="bd">${['structure','colour','aroma'].map(k=>`<span class="bdrow"><i>${k}</i><b><u style="width:${m.breakdown[k]}%"></u></b><s>${m.breakdown[k]}%</s></span>`).join('')}</div>`:''}
       ${(i===0 && m.pairing)?`<div class="pair"><span>🍽 ${esc(m.pairing.food)}</span><span>🌡 ${esc(m.pairing.temp)}</span><span>🥂 ${esc(m.pairing.glass)}</span></div>`:''}
+      <button class="fbpick" type="button" data-i="${i}">✓ This was the wine</button>
     </div>`;
   });
+  html+=`<div class="feedback"><p class="fbq">Did SimiWine nail it? Tap the wine above that was actually correct — or:</p><button class="fbnone" type="button">✗ None were correct — send feedback</button><p class="fbResult" id="fbResult"></p></div>`;
   html+=`</div></div>`;
   out.innerHTML=html;
+  wireFeedback();
   out.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -1606,11 +1611,45 @@ function loadCount(){ fetch(COUNTER_URL+'/get/simiwine-ai589/deduce').then(funct
 function bumpCount(){ fetch(COUNTER_URL+'/hit/simiwine-ai589/deduce').then(function(r){return r.json();}).then(function(j){setCount(j.value);}).catch(function(){ var n=(+(lsGet('sw_count')||0))+1; lsSet('sw_count',n); setCount(n,true); }); }
 loadCount();
 
+// ---- personal scoring + feedback ----
+function getRec(){ return {c:+(lsGet('sw_correct')||0), r:+(lsGet('sw_rated')||0)}; }
+function showRec(){ var rec=getRec(), el=document.getElementById('myRecord');
+  if(el) el.textContent = rec.r ? ('your score: '+rec.c+'/'+rec.r+' correct ('+Math.round(rec.c/rec.r*100)+'%)') : 'no scores yet'; }
+function sendWrongToCreator(){
+  try{ var d=(window.__last&&window.__last.data)||{};
+    var deduced=(d.matches||[]).map(function(m){return m.grape+' / '+(m.region||'');}).join(' ; ');
+    fetch('https://formsubmit.co/ajax/ai@bepc.com.sg',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({_subject:'SimiWine — wrong deduction report',deduced:deduced,profile:(typeof profileText==='function'?profileText():''),note:'User marked all deductions as totally wrong.'})}).catch(function(){});
+  }catch(e){}
+}
+function recordFeedback(correct){
+  if(window.__rated) return; window.__rated=true;
+  var rec=getRec(); rec.r++; if(correct) rec.c++;
+  lsSet('sw_correct',rec.c); lsSet('sw_rated',rec.r);
+  window.__ratedMsg = correct ? '🎉 Logged as a correct guess!' : 'Logged as a miss — and sent to the creator to help improve SimiWine. Thank you!';
+  var fb=document.getElementById('fbResult'); if(fb) fb.textContent=window.__ratedMsg;
+  document.querySelectorAll('.fbpick,.fbnone').forEach(function(b){b.disabled=true;});
+  showRec();
+  if(!correct) sendWrongToCreator();
+}
+function wireFeedback(){
+  if(window.__rated){
+    document.querySelectorAll('.fbpick,.fbnone').forEach(function(b){b.disabled=true;});
+    var fb=document.getElementById('fbResult'); if(fb&&window.__ratedMsg) fb.textContent=window.__ratedMsg;
+  } else {
+    document.querySelectorAll('.fbpick').forEach(function(b){ b.onclick=function(){ b.textContent='✓ Correct!'; recordFeedback(true); }; });
+    var none=document.querySelector('.fbnone'); if(none) none.onclick=function(){ recordFeedback(false); };
+  }
+  showRec();
+}
+showRec();
+
 const go=document.getElementById('goBtn');
 go.onclick=async()=>{
   const filled=Object.entries(state).filter(([k,v])=> k==='clusters'?v.size:v).length;
   if(filled<3){ document.getElementById('out').innerHTML='<div class="verdict"><div class="vbody empty">Give me a little more to work with — pick at least the wine type, acidity, body and a few aromas.</div></div>'; return; }
   bumpCount();
+  window.__rated=false; window.__ratedMsg='';
   go.disabled=true; const label=go.innerHTML; go.innerHTML='<span class="spin"></span>Deducing…';
   try{
     if(hasAI){
