@@ -332,7 +332,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
     <br><br>
     ☕ <strong>Enjoyed SimiWine? Donations are warmly welcomed</strong> — they help keep it free and growing.
     <br><br>
-    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.29-0118 (SGT)</span>
+    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.29-0902 (SGT)</span>
   </p>
   <div class="contact">
     <details>
@@ -1324,7 +1324,7 @@ LEXICON.forEach(sec=>{
       const id=g.prefix+" · "+it;
       const c=document.createElement('div');c.className='chip';c.dataset.id=id;
       c.dataset.search=(g.prefix+' '+it+' '+g.key).toLowerCase();
-      c.innerHTML=`<span class="ptag">${g.prefix}</span>${it}`;
+      c.textContent=it;
       c.onclick=()=>{ c.classList.toggle('on');
         c.classList.contains('on')?state.clusters.add(id):state.clusters.delete(id);
         updateSelCount(); };
