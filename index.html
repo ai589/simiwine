@@ -160,6 +160,10 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
 .fbResult{font-size:12.5px;color:var(--good);font-weight:700;margin:10px 0 0;min-height:16px}
 .match.correct{border-color:var(--good);box-shadow:0 0 0 3px rgba(46,156,99,.22)}
 .fbnone.wrong{border-color:#c0392b;color:#c0392b;background:#fdecea;box-shadow:0 0 0 3px rgba(192,57,43,.18)}
+.fbwrong{display:none;flex-direction:column;gap:8px;max-width:400px;margin:12px auto 0}
+.fbwrong input{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;background:#fff;color:var(--ink)}
+.fbwrong input:focus{outline:none;border-color:var(--wine2);box-shadow:0 0 0 3px rgba(176,43,86,.12)}
+.fbsend{align-self:center;padding:9px 20px;font-size:13px}
 @media print{.actions,.toolrow,.hero-art,.aromabar,.engine-badge,#kofi-btn{display:none!important}body{background:#fff}.card,.verdict{box-shadow:none;border-color:#ccc}}
 .concl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px}
 @media(max-width:680px){.concl{grid-template-columns:1fr}}
@@ -332,12 +336,12 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:6px 0 2px;c
     <br><br>
     ☕ <strong>Enjoyed SimiWine? Donations are warmly welcomed</strong> — they help keep it free and growing.
     <br><br>
-    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.29-0902 (SGT)</span>
+    <span style="opacity:.65;letter-spacing:.04em">Version v2026.06.29-1516 (SGT)</span>
   </p>
   <div class="contact">
     <details>
       <summary>💬 Message the creator</summary>
-      <form class="cform" action="https://formsubmit.co/ai@bepc.com.sg" method="POST">
+      <form class="cform" action="https://formsubmit.co/simiwine@outlook.com" method="POST">
         <input type="hidden" name="_subject" value="SimiWine — message from a taster">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
@@ -1585,7 +1589,7 @@ function render(data,engine){
       <button class="fbpick" type="button" data-i="${i}">✓ This was the wine</button>
     </div>`;
   });
-  html+=`<div class="feedback"><p class="fbq">Did SimiWine nail it? Tap the wine above that was actually correct — or:</p><button class="fbnone" type="button">✗ None were correct — send feedback</button><p class="fbResult" id="fbResult"></p></div>`;
+  html+=`<div class="feedback"><p class="fbq">Did SimiWine nail it? Tap the wine above that was actually correct — or:</p><button class="fbnone" type="button">✗ None were correct — send feedback</button><div class="fbwrong" id="fbWrong"><input id="actualWine" type="text" placeholder="What was the actual wine? (grape / producer / region)" autocomplete="off"><button class="fbsend btn primary" type="button">Send feedback</button></div><p class="fbResult" id="fbResult"></p></div>`;
   html+=`</div></div>`;
   out.innerHTML=html;
   wireFeedback();
@@ -1617,11 +1621,11 @@ loadCount();
 function getRec(){ return {c:+(lsGet('sw_correct')||0), r:+(lsGet('sw_rated')||0)}; }
 function showRec(){ var rec=getRec(), el=document.getElementById('myRecord');
   if(el) el.textContent = rec.r ? ('your score: '+rec.c+'/'+rec.r+' correct ('+Math.round(rec.c/rec.r*100)+'%)') : 'no scores yet'; }
-function sendWrongToCreator(){
+function sendWrongToCreator(actual){
   try{ var d=(window.__last&&window.__last.data)||{};
     var deduced=(d.matches||[]).map(function(m){return m.grape+' / '+(m.region||'');}).join(' ; ');
-    fetch('https://formsubmit.co/ajax/ai@bepc.com.sg',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({_subject:'SimiWine — wrong deduction report',deduced:deduced,profile:(typeof profileText==='function'?profileText():''),note:'User marked all deductions as totally wrong.'})}).catch(function(){});
+    fetch('https://formsubmit.co/ajax/simiwine@outlook.com',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({_subject:'SimiWine — wrong deduction report',actual_wine:(actual||'(not given)'),tasting_notes:(typeof profileText==='function'?profileText():''),deduced_instead:deduced,note:'User marked all deductions wrong and supplied the real wine.'})}).catch(function(){});
   }catch(e){}
 }
 function recordFeedback(correct){
@@ -1630,9 +1634,8 @@ function recordFeedback(correct){
   lsSet('sw_correct',rec.c); lsSet('sw_rated',rec.r);
   window.__ratedMsg = correct ? '🎉 Logged as a correct guess!' : 'Logged as a miss — and sent to the creator to help improve SimiWine. Thank you!';
   var fb=document.getElementById('fbResult'); if(fb) fb.textContent=window.__ratedMsg;
-  document.querySelectorAll('.fbpick,.fbnone').forEach(function(b){b.disabled=true;});
+  document.querySelectorAll('.fbpick,.fbnone,.fbsend').forEach(function(b){b.disabled=true;});
   showRec();
-  if(!correct) sendWrongToCreator();
 }
 function wireFeedback(){
   if(window.__rated){
@@ -1640,7 +1643,10 @@ function wireFeedback(){
     var fb=document.getElementById('fbResult'); if(fb&&window.__ratedMsg) fb.textContent=window.__ratedMsg;
   } else {
     document.querySelectorAll('.fbpick').forEach(function(b){ b.onclick=function(){ b.textContent='✓ Correct!'; var card=b.closest('.match'); if(card) card.classList.add('correct'); recordFeedback(true); }; });
-    var none=document.querySelector('.fbnone'); if(none) none.onclick=function(){ none.classList.add('wrong'); recordFeedback(false); };
+    var none=document.querySelector('.fbnone');
+    if(none) none.onclick=function(){ none.classList.add('wrong'); var fw=document.getElementById('fbWrong'); if(fw){ fw.style.display='flex'; var inp=document.getElementById('actualWine'); if(inp) inp.focus(); } };
+    var send=document.querySelector('.fbsend');
+    if(send) send.onclick=function(){ if(window.__rated) return; var inp=document.getElementById('actualWine'); var val=inp?inp.value.trim():''; if(!val){ if(inp){inp.focus();inp.style.borderColor='#c0392b';} return; } sendWrongToCreator(val); recordFeedback(false); var fw=document.getElementById('fbWrong'); if(fw) fw.style.display='none'; };
   }
   showRec();
 }
